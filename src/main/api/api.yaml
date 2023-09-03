@@ -1,0 +1,85 @@
+openapi: 3.0.1
+info:
+  title: API
+  description: API description in Markdown.
+  version: 1.0.0
+servers:
+  - url: 'localhost:8080'
+paths:
+  /accounts:
+    post:
+      tags:
+        - Accounts
+      operationId: registerNewAccount
+      description: "Creates a new account, use returned JWT from Authorization header for subsequent requests"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountRegistration'
+      responses:
+        '201':
+          description: Created
+          headers:
+            Authorization:
+              schema:
+                type: string
+              description: "JWT Bearer token, use it for subsequent requests"
+        '400':
+          description: Bad Request
+  /login:
+    post:
+      tags:
+        - Authentication
+      operationId: login
+      description: "Authenticate user, use returned JWT from Authorization header for subsequent requests"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountLogin'
+      responses:
+        '200':
+          description: OK
+          headers:
+            Authorization:
+              schema:
+                type: string
+              description: "JWT Bearer token, use it for subsequent requests"
+        '401':
+          description: Unauthorized
+
+components:
+  schemas:
+    AccountUsername:
+      type: string
+    AccountPassword:
+      type: string
+      description: |
+        It must be at least 8 characters long and contain 1 character from each of the following 
+        categories: uppercase letter, lowercase letter, number and special character.
+    AccountEmail:
+      type: string
+    AccountRegistration:
+      type: object
+      required:
+        - username
+        - password
+        - email
+      properties:
+        username:
+          $ref: '#/components/schemas/AccountUsername'
+        password:
+          $ref: '#/components/schemas/AccountPassword'
+        email:
+          $ref: '#/components/schemas/AccountEmail'
+    AccountLogin:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          $ref: '#/components/schemas/AccountUsername'
+        password:
+          type: string
