@@ -1,7 +1,6 @@
 package io.github.mateusz00.rest;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,6 +25,6 @@ public class AccountsApiController implements AccountsApi
     {
         User user = userService.registerUser(accountRegistration);
         response.addHeader(HttpHeaders.AUTHORIZATION, tokenService.createToken(user.getUsername(), user.getGrantedAuthorities()));
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return ResponseEntity.noContent().build();
     }
 }

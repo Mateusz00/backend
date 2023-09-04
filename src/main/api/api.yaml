@@ -18,8 +18,8 @@ paths:
             schema:
               $ref: '#/components/schemas/AccountRegistration'
       responses:
-        '201':
-          description: Created
+        '204':
+          description: Account created
           headers:
             Authorization:
               schema:
@@ -27,6 +27,45 @@ paths:
               description: "JWT Bearer token, use it for subsequent requests"
         '400':
           description: Bad Request
+  /exercises:
+    post:
+      tags:
+        - Exercises
+      operationId: createNewExercise
+      description: "Requires admin role"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GrammarExercise'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GrammarExercise'
+          description: OK
+        '400':
+          description: Bad Request
+  /exercises/{exerciseId}:
+    delete:
+      tags:
+        - Exercises
+      description: "Requires admin role"
+      operationId: deleteExercise
+      parameters:
+        - in: path
+          name: exerciseId
+          description: 'Unique ID of an exercise'
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+        '403':
+          description: Forbidden
+
   /login:
     post:
       tags:
@@ -83,3 +122,75 @@ components:
           $ref: '#/components/schemas/AccountUsername'
         password:
           type: string
+    GrammarExercise:
+      type: object
+      required:
+        - instruction
+      properties:
+        id:
+          type: string
+        instruction:
+          type: string
+          description: "Default exercise instructions, used when no instructionsLanguage is set in user's settings or when translation was not provided"
+        translatedInstructions:
+          type: array
+          items:
+            $ref: '#/components/schemas/GrammarExerciseTranslatedInstruction'
+        imgUrl:
+          $ref: '#/components/schemas/MediaResourceUrl'
+        audioUrl:
+          $ref: '#/components/schemas/MediaResourceUrl'
+        answers:
+          type: array
+          description: "Defines sets of correct answers"
+          items:
+            $ref: '#/components/schemas/GrammarExerciseAnswer'
+        body:
+          $ref: '#/components/schemas/GrammarExerciseBody'
+        useCase:
+          $ref: '#/components/schemas/GrammarExerciseUseCase'
+        grammar:
+          $ref: '#/components/schemas/GrammarExerciseGrammar'
+    GrammarExerciseTranslatedInstruction:
+      type: object
+      properties:
+        instruction:
+          $ref: '#/components/schemas/GrammarExerciseInstructionContent'
+        language:
+          $ref: '#/components/schemas/Language'
+    MediaResourceUrl:
+      type: string
+      description: "URL to the resource"
+    GrammarExerciseAnswer:
+      type: object
+      properties:
+        correctValues:
+          $ref: '#/components/schemas/CorrectAnswers'
+    GrammarExerciseBody:
+      type: string
+      description: "Content of the exercise"
+    GrammarExerciseUseCase:
+      type: string
+      enum:
+        - PAST_SIMPLE_POSITIVE
+        - PAST_SIMPLE_NEGATIVE
+        - PAST_SIMPLE_QUESTIONS
+    GrammarExerciseGrammar:
+      type: string
+      enum:
+        - PAST_SIMPLE
+    CorrectAnswers:
+      type: array
+      description: "Defines all possible correct answers. Answer has to be the same as one of the defined values to be considered correct"
+      items:
+        $ref: '#/components/schemas/CorrectAnswer'
+    GrammarExerciseInstructionContent:
+      type: string
+    Language:
+      type: string
+      enum:
+        - POLISH
+        - ENGLISH
+        - CHINESE
+    CorrectAnswer:
+      type: string
