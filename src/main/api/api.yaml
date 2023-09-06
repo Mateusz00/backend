@@ -10,6 +10,7 @@ paths:
     post:
       tags:
         - Accounts
+      summary: Register new account
       operationId: registerNewAccount
       description: "Creates a new account, use returned JWT from Authorization header for subsequent requests"
       requestBody:
@@ -27,17 +28,92 @@ paths:
               description: "JWT Bearer token, use it for subsequent requests"
         '400':
           description: Bad Request
+
+  /settings:
+    get:
+      tags:
+        - Settings
+      summary: "Get user settings"
+      description: "Get settings of the user from the JWT"
+      operationId: getUserSettings
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSettings"
+        '401':
+          description: Unauthorized
+    put:
+      tags:
+        - Settings
+      summary: "Update user settings"
+      description: "Update settings of the user from the JWT"
+      operationId: updateUserSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSettings'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSettings"
+        '401':
+          description: Unauthorized
+        '404':
+          description: Bad request
+
+  /schedule/exercises:
+    get:
+      tags:
+        - Schedule
+      summary: "Get scheduled exercises"
+      description: "Get all scheduled grammar exercises"
+      operationId: getScheduledExercises
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduledGrammarExercisesPage"
+        '401':
+          description: Unauthorized
+
   /exercises:
+    get:
+      tags:
+        - Exercises
+      summary: List exercises
+      operationId: listExercises
+      parameters:
+        - $ref: '#/components/parameters/useCaseQueryParam'
+        - $ref: '#/components/parameters/grammarQueryParam'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GrammarExercisesPage'
+          description: OK
+        '400':
+          description: Bad Request
     post:
       tags:
         - Exercises
+      summary: Create exercise
       operationId: createNewExercise
       description: "Requires admin role"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GrammarExercise'
+              $ref: '#/components/schemas/GrammarExerciseUpsert'
       responses:
         '200':
           content:
@@ -48,28 +124,101 @@ paths:
         '400':
           description: Bad Request
   /exercises/{exerciseId}:
+    parameters:
+      - $ref: '#/components/parameters/exerciseIdPathParam'
+    get:
+      tags:
+        - Exercises
+      summary: Get exercise
+      operationId: getExercise
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GrammarExercise'
+        '404':
+          description: Not found
+    put:
+      tags:
+        - Exercises
+      summary: Update exercise
+      description: "Requires admin role"
+      operationId: updateExercise
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GrammarExerciseUpsert'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GrammarExercise'
+        '404':
+          description: Not found
+        '403':
+          description: Forbidden
     delete:
       tags:
         - Exercises
+      summary: Delete exercise
       description: "Requires admin role"
       operationId: deleteExercise
-      parameters:
-        - in: path
-          name: exerciseId
-          description: 'Unique ID of an exercise'
-          required: true
-          schema:
-            type: string
       responses:
         '204':
           description: No content
         '403':
           description: Forbidden
+  /resources:
+    post:
+      tags:
+        - Resources
+      summary: Upload Resource
+      operationId: uploadResource
+      description: "Upload media like audio and images"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResourceUploadRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileDownloadResult"
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+  /exercises/answers:
+    post:
+      tags:
+        - Exercises
+      summary: Submit answer
+      operationId: submitAnswer
+      requestBody:
+        description: "One of the fields must be filled"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmittedAnswer'
+      responses:
+        '200':
+          description: Answer was processed successfully
+        '401':
+          description: Unauthorized
 
   /login:
     post:
       tags:
         - Authentication
+      summary: Login
       operationId: login
       description: "Authenticate user, use returned JWT from Authorization header for subsequent requests"
       requestBody:
@@ -123,15 +272,22 @@ components:
         password:
           type: string
     GrammarExercise:
+      allOf:
+        - $ref: '#/components/schemas/GrammarExerciseUpsert'
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/GrammarExerciseId'
+    GrammarExerciseUpsert:
       type: object
       required:
         - instruction
+        - body
+        - useCase
+        - grammar
       properties:
-        id:
-          type: string
         instruction:
-          type: string
-          description: "Default exercise instructions, used when no instructionsLanguage is set in user's settings or when translation was not provided"
+          $ref: '#/components/schemas/GrammarExerciseDefaultInstruction'
         translatedInstructions:
           type: array
           items:
@@ -160,7 +316,7 @@ components:
           $ref: '#/components/schemas/Language'
     MediaResourceUrl:
       type: string
-      description: "URL to the resource"
+      description: "URL to the resource. Upload using [this](#tag/Resources/operation/uploadResource) endpoint"
     GrammarExerciseAnswer:
       type: object
       properties:
@@ -183,7 +339,7 @@ components:
       type: array
       description: "Defines all possible correct answers. Answer has to be the same as one of the defined values to be considered correct"
       items:
-        $ref: '#/components/schemas/CorrectAnswer'
+        $ref: '#/components/schemas/Answer'
     GrammarExerciseInstructionContent:
       type: string
     Language:
@@ -192,5 +348,254 @@ components:
         - POLISH
         - ENGLISH
         - CHINESE
-    CorrectAnswer:
+    Answer:
       type: string
+    SubmittedAnswer:
+      type: object
+      description: "One of the fields must be filled"
+      properties:
+        suspend:
+          $ref: '#/components/schemas/SuspendExercise'
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Answer'
+    SuspendExercise:
+      type: boolean
+      description: "Mark exercise as suspended when true"
+    ResourceUploadRequest:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/ResourceType'
+        file:
+          type: string
+          format: binary
+          description: "Max file size is 1MB"
+    ResourceType:
+      type: string
+      description: "Allowed file types: mp3, aac, opus, png, jpg, webp"
+    FileDownloadResult:
+      type: object
+      properties:
+        url:
+          $ref: '#/components/schemas/MediaResourceUrl'
+    GrammarExercisesPage:
+      allOf:
+        - $ref: '#/components/schemas/PageBase'
+        - type: object
+          properties:
+            exercises:
+              type: array
+              items:
+                $ref: '#/components/schemas/GrammarExerciseSummary'
+    PageBase:
+      type: object
+      properties:
+        limit:
+          $ref: '#/components/schemas/Limit'
+        startAfter:
+          $ref: '#/components/schemas/StartAfter'
+        nextStartAfter:
+          $ref: '#/components/schemas/NextStartAfter'
+        total:
+          $ref: '#/components/schemas/PageTotal'
+    Limit:
+      type: string
+      description: "Current limit of items per page"
+    StartAfter:
+      type: string
+      description: "Current cursor"
+    NextStartAfter:
+      type: string
+      description: "New cursor which should be used in the next request"
+    PageTotal:
+      type: string
+      description: "Total number of items"
+    GrammarExerciseSummary:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/GrammarExerciseId'
+        instruction:
+          $ref: '#/components/schemas/GrammarExerciseDefaultInstruction'
+        useCase:
+          $ref: '#/components/schemas/GrammarExerciseUseCase'
+        grammar:
+          $ref: '#/components/schemas/GrammarExerciseGrammar'
+    GrammarExerciseId:
+      type: string
+    GrammarExerciseDefaultInstruction:
+      type: string
+      description: "Default exercise instructions, used when no instructionsLanguage is set in user's settings or when translation was not provided"
+    ScheduledGrammarExercisesPage:
+      allOf:
+        - $ref: '#/components/schemas/PageBase'
+        - type: object
+          properties:
+            exercises:
+              type: array
+              items:
+                $ref: '#/components/schemas/GrammarExerciseId'
+    UserSettings: # TODO Enabling of useCases + grammarSettings (maybe separate endpoint like: /settings/grammar (POST=filter inside body GET=query))
+      type: object
+      required:
+        - siteSettings
+        - defaultDecksSettings
+        - defaultGrammarSettings
+      properties:
+        siteSettings:
+          $ref: '#/components/schemas/UserSiteSettings'
+        defaultDecksSettings:
+          $ref: '#/components/schemas/UserDeckSettings'
+        defaultGrammarSettings:
+          $ref: '#/components/schemas/UserGrammarSettings'
+    UserGrammarSettings:
+      type: object
+      required:
+        - maxInterval
+        - intervalRateAfterFail
+        - failThreshold
+        - exercisesPerDay
+      properties:
+        maxInterval:
+          $ref: '#/components/schemas/MaxIntervalSetting'
+        intervalRateAfterFail:
+          $ref: '#/components/schemas/IntervalRateAfterFailSetting'
+        failThreshold:
+          $ref: '#/components/schemas/FailThresholdSetting'
+        exercisesPerDay:
+          $ref: '#/components/schemas/ExercisesPerDaySetting'
+    UserDeckSettings:
+      type: object
+      required:
+        - newCardsPerDay
+        - easyRate
+        - hardRate
+        - maxInterval
+        - minInterval
+        - globalEaseModifier
+        - intervalRateAfterFail
+        - leechThreshold
+        - newCardSteps
+      properties:
+        newCardsPerDay:
+          $ref: '#/components/schemas/NewCardsPerDaySetting'
+        easyRate:
+          $ref: '#/components/schemas/EasyRateSetting'
+        hardRate:
+          $ref: '#/components/schemas/HardRateSetting'
+        maxInterval:
+          $ref: '#/components/schemas/MaxIntervalSetting'
+        minInterval:
+          $ref: '#/components/schemas/MinIntervalSetting'
+        globalEaseModifier:
+          $ref: '#/components/schemas/GlobalEaseModifierSetting'
+        intervalRateAfterFail:
+          $ref: '#/components/schemas/IntervalRateAfterFailSetting'
+        leechThreshold:
+          $ref: '#/components/schemas/LeechThresholdSetting'
+        newCardSteps:
+          $ref: '#/components/schemas/NewCardStepsSetting'
+    UserSiteSettings:
+      type: object
+      required:
+        - displayLanguage
+        - instructionsLanguage
+      properties:
+        displayLanguage:
+          $ref: '#/components/schemas/DisplayLanguageSetting'
+        instructionsLanguage:
+          $ref: '#/components/schemas/InstructionsLanguageSetting'
+    MaxIntervalSetting:
+      type: integer
+      format: int32
+      minimum: 1
+      description: "The maximum interval (in days) that can be used in determining the date of the next review"
+    IntervalRateAfterFailSetting:
+      type: number
+      format: float
+      minimum: 0
+      exclusiveMinimum: true
+      description: "Multiplier used in calculating the date of the next review if the threshold of incorrect answers is exceeded"
+    FailThresholdSetting:
+      type: integer
+      format: int32
+      minimum: 1
+      description: "Threshold of incorrect answers after which use case review is considered as failed"
+    ExercisesPerDaySetting:
+      type: integer
+      format: int32
+      minimum: 1
+      description: "The number of exercises that should be performed as part of the review of a given use case, the date of the next review is calculated after passing this threshold"
+    NewCardsPerDaySetting:
+      type: integer
+      format: int32
+      minimum: 0
+      description: "The number of new cards that should appear during review"
+    EasyRateSetting:
+      type: number
+      format: float
+      minimum: 1
+      description: "The multiplier for the 'easy' answer, used during calculation of the next review date"
+    HardRateSetting:
+      type: number
+      format: float
+      minimum: 0
+      exclusiveMinimum: true
+      maximum: 1
+      description: "The multiplier for the 'hard' answer, used during calculation of the next review date"
+    MinIntervalSetting:
+      type: integer
+      format: int32
+      minimum: 1
+      description: "The minimum interval (in days) that can be used in determining the date of the next review"
+    GlobalEaseModifierSetting:
+      type: number
+      format: float
+      minimum: 0
+      exclusiveMinimum: true
+      description: "The multiplier used during calculation of the next review date for correct answers"
+    LeechThresholdSetting:
+      type: integer
+      format: int32
+      minimum: 1
+      description: "Threshold of failed answers after which card is marked as leech"
+    NewCardStepsSetting:
+      type: array
+      minimum: 1
+      description: "For each new card, you must give as many correct answers in a row as the number of steps defined"
+      items:
+        $ref: '#/components/schemas/NewCardStepSetting'
+    NewCardStepSetting:
+      type: integer
+      format: int32
+      minimum: 1
+      description: "Interval (in minutes) for new cards, used for the next review date calculation"
+    DisplayLanguageSetting:
+      $ref: '#/components/schemas/Language'
+    InstructionsLanguageSetting:
+      $ref: '#/components/schemas/Language'
+
+  parameters:
+    exerciseIdPathParam:
+        name: exerciseId
+        in: path
+        description: 'Unique ID of an exercise'
+        required: true
+        schema:
+          type: string
+    useCaseQueryParam:
+      name: useCase
+      in: query
+      description: "Use case to filter by"
+      required: false
+      schema:
+        $ref: '#/components/schemas/GrammarExerciseUseCase'
+    grammarQueryParam:
+      name: grammar
+      in: query
+      description: "Grammar to filter by"
+      required: false
+      schema:
+        $ref: '#/components/schemas/GrammarExerciseGrammar'
