@@ -67,6 +67,60 @@ paths:
           description: Unauthorized
         '404':
           description: Bad request
+  /settings/grammar:
+    get:
+      tags:
+        - Settings
+      summary: "Get user grammar settings"
+      description: "Get grammar settings of the user from the JWT"
+      operationId: getUserGrammarSettings
+      parameters:
+        - $ref: '#/components/parameters/grammarQueryParam'
+        - $ref: '#/components/parameters/languageQueryParam'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserGrammarSettingsSearchResults"
+        '401':
+          description: Unauthorized
+    put:
+      tags:
+        - Settings
+      summary: "Update user grammar settings"
+      description: "Update grammar settings of the user from the JWT"
+      operationId: updateUserGrammarSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGrammarSettingsUpsert'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserGrammarSettingsSearchResult"
+        '401':
+          description: Unauthorized
+        '404':
+          description: Bad request
+    delete:
+      tags:
+        - Settings
+      summary: "Delete user grammar settings"
+      description: "Delete grammar settings of the user from the JWT"
+      operationId: deleteUserGrammarSettings
+      parameters:
+        - $ref: '#/components/parameters/grammarSettingIdQueryParam'
+      responses:
+        "204":
+          description: OK
+        '401':
+          description: Unauthorized
 
   /schedule/exercises:
     get:
@@ -81,7 +135,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ScheduledGrammarExercisesPage"
+                $ref: "#/components/schemas/ScheduledGrammarExercises"
         '401':
           description: Unauthorized
 
@@ -92,6 +146,8 @@ paths:
       summary: List exercises
       operationId: listExercises
       parameters:
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/pageOffsetQueryParam'
         - $ref: '#/components/parameters/useCaseQueryParam'
         - $ref: '#/components/parameters/grammarQueryParam'
       responses:
@@ -304,9 +360,9 @@ components:
         body:
           $ref: '#/components/schemas/GrammarExerciseBody'
         useCase:
-          $ref: '#/components/schemas/GrammarExerciseUseCase'
+          $ref: '#/components/schemas/UseCase'
         grammar:
-          $ref: '#/components/schemas/GrammarExerciseGrammar'
+          $ref: '#/components/schemas/Grammar'
     GrammarExerciseTranslatedInstruction:
       type: object
       properties:
@@ -325,13 +381,13 @@ components:
     GrammarExerciseBody:
       type: string
       description: "Content of the exercise"
-    GrammarExerciseUseCase:
+    UseCase:
       type: string
       enum:
         - PAST_SIMPLE_POSITIVE
         - PAST_SIMPLE_NEGATIVE
         - PAST_SIMPLE_QUESTIONS
-    GrammarExerciseGrammar:
+    Grammar:
       type: string
       enum:
         - PAST_SIMPLE
@@ -394,23 +450,32 @@ components:
       properties:
         limit:
           $ref: '#/components/schemas/Limit'
-        startAfter:
-          $ref: '#/components/schemas/StartAfter'
-        nextStartAfter:
-          $ref: '#/components/schemas/NextStartAfter'
-        total:
+        offset:
+          $ref: '#/components/schemas/PageItemsOffset'
+        currentPage:
+          $ref: '#/components/schemas/PageIndex'
+        pageTotal:
           $ref: '#/components/schemas/PageTotal'
+        total:
+          $ref: '#/components/schemas/ItemsTotal'
     Limit:
-      type: string
+      type: integer
+      format: int32
       description: "Current limit of items per page"
-    StartAfter:
-      type: string
-      description: "Current cursor"
-    NextStartAfter:
-      type: string
-      description: "New cursor which should be used in the next request"
+    PageItemsOffset:
+      type: integer
+      format: int32
+      minimum: 0
+    PageIndex:
+      type: integer
+      format: int32
     PageTotal:
-      type: string
+      type: integer
+      format: int32
+      description: "Total number of pages"
+    ItemsTotal:
+      type: integer
+      format: int32
       description: "Total number of items"
     GrammarExerciseSummary:
       type: object
@@ -420,23 +485,25 @@ components:
         instruction:
           $ref: '#/components/schemas/GrammarExerciseDefaultInstruction'
         useCase:
-          $ref: '#/components/schemas/GrammarExerciseUseCase'
+          $ref: '#/components/schemas/UseCase'
         grammar:
-          $ref: '#/components/schemas/GrammarExerciseGrammar'
+          $ref: '#/components/schemas/Grammar'
     GrammarExerciseId:
       type: string
     GrammarExerciseDefaultInstruction:
       type: string
       description: "Default exercise instructions, used when no instructionsLanguage is set in user's settings or when translation was not provided"
-    ScheduledGrammarExercisesPage:
-      allOf:
-        - $ref: '#/components/schemas/PageBase'
-        - type: object
-          properties:
-            exercises:
-              type: array
-              items:
-                $ref: '#/components/schemas/GrammarExerciseId'
+    ScheduledGrammarExercises:
+      type: object
+      properties:
+        total:
+          $ref: '#/components/schemas/ItemsTotal'
+        exercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/GrammarExerciseId'
+
+                #TODO deck settings /decks/ID/settings
     UserSettings: # TODO Enabling of useCases + grammarSettings (maybe separate endpoint like: /settings/grammar (POST=filter inside body GET=query))
       type: object
       required:
@@ -449,14 +516,28 @@ components:
         defaultDecksSettings:
           $ref: '#/components/schemas/UserDeckSettings'
         defaultGrammarSettings:
-          $ref: '#/components/schemas/UserGrammarSettings'
-    UserGrammarSettings:
+          $ref: '#/components/schemas/DefaultUserGrammarSettings'
+    UserGrammarSettingsSearchResults:
       type: object
-      required:
-        - maxInterval
-        - intervalRateAfterFail
-        - failThreshold
-        - exercisesPerDay
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserGrammarSettingsSearchResult'
+        total:
+          $ref: '#/components/schemas/ItemsTotal'
+    UserGrammarSettingsSearchResult:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/GrammarExerciseId'
+        settings:
+          $ref: '#/components/schemas/UserGrammarSettings'
+        grammar:
+          $ref: '#/components/schemas/Grammar'
+        language:
+          $ref: '#/components/schemas/Language'
+    UserGrammarSettings:
       properties:
         maxInterval:
           $ref: '#/components/schemas/MaxIntervalSetting'
@@ -466,6 +547,15 @@ components:
           $ref: '#/components/schemas/FailThresholdSetting'
         exercisesPerDay:
           $ref: '#/components/schemas/ExercisesPerDaySetting'
+    DefaultUserGrammarSettings:
+      allOf:
+        - $ref: '#/components/schemas/UserGrammarSettings'
+        - type: object
+          required:
+            - maxInterval
+            - intervalRateAfterFail
+            - failThreshold
+            - exercisesPerDay
     UserDeckSettings:
       type: object
       required:
@@ -563,7 +653,7 @@ components:
       description: "Threshold of failed answers after which card is marked as leech"
     NewCardStepsSetting:
       type: array
-      minimum: 1
+      minItems: 1
       description: "For each new card, you must give as many correct answers in a row as the number of steps defined"
       items:
         $ref: '#/components/schemas/NewCardStepSetting'
@@ -576,6 +666,27 @@ components:
       $ref: '#/components/schemas/Language'
     InstructionsLanguageSetting:
       $ref: '#/components/schemas/Language'
+    UserGrammarSettingId:
+      type: string
+    UserGrammarSettingsUpsert:
+      type: object
+      description: "Enabled use cases must be part of the grammar"
+      required:
+        - grammar
+        - settings
+        - enabledUseCases
+      properties:
+        grammar:
+          $ref: '#/components/schemas/Grammar'
+        settings:
+          $ref: '#/components/schemas/UserGrammarSettings'
+        enabledUseCases:
+          $ref: '#/components/schemas/EnabledUseCases'
+    EnabledUseCases:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/UseCase'
 
   parameters:
     exerciseIdPathParam:
@@ -591,11 +702,42 @@ components:
       description: "Use case to filter by"
       required: false
       schema:
-        $ref: '#/components/schemas/GrammarExerciseUseCase'
+        $ref: '#/components/schemas/UseCase'
     grammarQueryParam:
       name: grammar
       in: query
       description: "Grammar to filter by"
       required: false
       schema:
-        $ref: '#/components/schemas/GrammarExerciseGrammar'
+        $ref: '#/components/schemas/Grammar'
+    languageQueryParam:
+      name: language
+      in: query
+      description: "Language to filter by"
+      required: false
+      schema:
+        $ref: '#/components/schemas/Language'
+    pageOffsetQueryParam:
+      name: offset
+      in: query
+      description: "The (zero-based) pagination offset"
+      required: false
+      schema:
+        $ref: '#/components/schemas/PageItemsOffset'
+    limitQueryParam:
+      name: limit
+      in: query
+      description: "The maximum number of entries to return"
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 100
+        default: 100
+    grammarSettingIdQueryParam:
+      name: grammarSettingId
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/UserGrammarSettingId'
