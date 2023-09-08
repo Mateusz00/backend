@@ -20,7 +20,7 @@ paths:
               $ref: '#/components/schemas/AccountRegistration'
       responses:
         '204':
-          description: Account created
+          description: No content
           headers:
             Authorization:
               schema:
@@ -28,6 +28,81 @@ paths:
               description: "JWT Bearer token, use it for subsequent requests"
         '400':
           description: Bad Request
+
+  /decks:
+    post:
+      tags:
+        - Decks
+      summary: "Create deck"
+      operationId: createDeck
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeckCreateRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deck"
+        '401':
+          description: Unauthorized
+        '400':
+          description: Bad request
+    get:
+      tags:
+        - Decks
+      summary: "List decks"
+      operationId: listDecks
+      parameters:
+        - $ref: '#/components/parameters/isoLanguageCodeQueryParam'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DecksPage"
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not found
+  /decks/{deckId}:
+    parameters:
+      - $ref: '#/components/parameters/deckIdPathParam'
+    put:
+      tags:
+        - Decks
+      summary: "Update deck"
+      operationId: updateDeck
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeckUpdateRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deck"
+        '401':
+          description: Unauthorized
+        '400':
+          description: Bad request
+    delete:
+      tags:
+        - Decks
+      summary: "Delete deck"
+      operationId: deleteDeck
+      responses:
+        "204":
+          description: No content
+        '401':
+          description: Unauthorized
 
   /settings:
     get:
@@ -65,7 +140,7 @@ paths:
                 $ref: "#/components/schemas/UserSettings"
         '401':
           description: Unauthorized
-        '404':
+        '400':
           description: Bad request
   /settings/grammar:
     get:
@@ -106,7 +181,7 @@ paths:
                 $ref: "#/components/schemas/UserGrammarSettingsSearchResult"
         '401':
           description: Unauthorized
-        '404':
+        '400':
           description: Bad request
     delete:
       tags:
@@ -118,7 +193,7 @@ paths:
         - $ref: '#/components/parameters/grammarSettingIdQueryParam'
       responses:
         "204":
-          description: OK
+          description: No content
         '401':
           description: Unauthorized
 
@@ -194,7 +269,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GrammarExercise'
-        '404':
+        '400':
           description: Not found
     put:
       tags:
@@ -514,7 +589,7 @@ components:
         siteSettings:
           $ref: '#/components/schemas/UserSiteSettings'
         defaultDecksSettings:
-          $ref: '#/components/schemas/UserDeckSettings'
+          $ref: '#/components/schemas/DefaultUserDeckSettings'
         defaultGrammarSettings:
           $ref: '#/components/schemas/DefaultUserGrammarSettings'
     UserGrammarSettingsSearchResults:
@@ -556,18 +631,22 @@ components:
             - intervalRateAfterFail
             - failThreshold
             - exercisesPerDay
+    DefaultUserDeckSettings:
+      allOf:
+        - $ref: '#/components/schemas/UserDeckSettings'
+        - type: object
+          required:
+            - newCardsPerDay
+            - easyRate
+            - hardRate
+            - maxInterval
+            - minInterval
+            - globalEaseModifier
+            - intervalRateAfterFail
+            - leechThreshold
+            - newCardSteps
     UserDeckSettings:
       type: object
-      required:
-        - newCardsPerDay
-        - easyRate
-        - hardRate
-        - maxInterval
-        - minInterval
-        - globalEaseModifier
-        - intervalRateAfterFail
-        - leechThreshold
-        - newCardSteps
       properties:
         newCardsPerDay:
           $ref: '#/components/schemas/NewCardsPerDaySetting'
@@ -687,15 +766,85 @@ components:
       minItems: 1
       items:
         $ref: '#/components/schemas/UseCase'
+    Deck:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/DeckId'
+        name:
+          $ref: '#/components/schemas/DeckName'
+        sharedDeckId:
+          $ref: '#/components/schemas/SharedDeckId'
+        language:
+          $ref: '#/components/schemas/IsoLanguageCode'
+        customSettings:
+          $ref: '#/components/schemas/UserDeckSettings'
+        effectiveSettings:
+          $ref: '#/components/schemas/UserDeckSettings'
+    DeckCreateRequest:
+      type: object
+      required:
+        - name
+        - language
+      properties:
+        name:
+          $ref: '#/components/schemas/DeckName'
+        sharedDeckId:
+          $ref: '#/components/schemas/SharedDeckId'
+        language:
+          $ref: '#/components/schemas/IsoLanguageCode'
+        customSettings:
+          $ref: '#/components/schemas/UserDeckSettings'
+    DeckUpdateRequest:
+      type: object
+      required:
+        - name
+        - language
+      properties:
+        name:
+          $ref: '#/components/schemas/DeckName'
+        language:
+          $ref: '#/components/schemas/IsoLanguageCode'
+        customSettings:
+          $ref: '#/components/schemas/UserDeckSettings'
+    DecksPage:
+      allOf:
+        - $ref: '#/components/schemas/PageBase'
+        - type: object
+          properties:
+            decks:
+              type: array
+              items:
+                $ref: '#/components/schemas/DeckSearchResult'
+    DeckId:
+      type: string
+    DeckSearchResult:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/DeckId'
+        name:
+          $ref: '#/components/schemas/DeckName'
+        sharedDeckId:
+          $ref: '#/components/schemas/SharedDeckId'
+        language:
+          $ref: '#/components/schemas/IsoLanguageCode'
+    DeckName:
+      type: string
+    SharedDeckId:
+      type: string
+    IsoLanguageCode:
+      type: string
+      description: "ISO 639-1 code"
 
   parameters:
     exerciseIdPathParam:
         name: exerciseId
         in: path
-        description: 'Unique ID of an exercise'
+        description: 'Unique ID of the exercise'
         required: true
         schema:
-          type: string
+          $ref: '#/components/schemas/GrammarExerciseId'
     useCaseQueryParam:
       name: useCase
       in: query
@@ -717,6 +866,13 @@ components:
       required: false
       schema:
         $ref: '#/components/schemas/Language'
+    isoLanguageCodeQueryParam:
+      name: language
+      in: query
+      description: "ISO 639-1 code to filter by"
+      required: false
+      schema:
+        $ref: '#/components/schemas/IsoLanguageCode'
     pageOffsetQueryParam:
       name: offset
       in: query
@@ -741,3 +897,10 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/UserGrammarSettingId'
+    deckIdPathParam:
+      name: deckId
+      in: path
+      description: 'Unique ID of the deck'
+      required: true
+      schema:
+        $ref: '#/components/schemas/DeckId'
