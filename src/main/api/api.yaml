@@ -908,6 +908,8 @@ components:
           $ref: '#/components/schemas/SharedDeckId'
         language:
           $ref: '#/components/schemas/IsoLanguageCode'
+        cardsTotal:
+          $ref: '#/components/schemas/DeckTotalCards'
     DeckName:
       type: string
     SharedDeckId:
@@ -960,7 +962,7 @@ components:
             cards:
               type: array
               items:
-                $ref: '#/components/schemas/CardSearchResult'
+                $ref: '#/components/schemas/Card'
     CardUpdateRequest:
       type: object
       properties:
@@ -970,29 +972,6 @@ components:
           $ref: '#/components/schemas/CardContentElements'
         isSuspended:
           $ref: '#/components/schemas/CardIsSuspended'
-    CardSearchResult:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/CardId'
-        front:
-          $ref: '#/components/schemas/CardContentElements'
-        status:
-          $ref: '#/components/schemas/CardStatus'
-        nextReview:
-          $ref: '#/components/schemas/CardNextReview'
-        easeRate:
-          $ref: '#/components/schemas/CardEaseRate'
-        interval:
-          $ref: '#/components/schemas/CardInterval'
-        isSuspended:
-          $ref: '#/components/schemas/CardIsSuspended'
-        currentStep:
-          $ref: '#/components/schemas/CardCurrentStep'
-        statistics:
-          $ref: '#/components/schemas/CardStatistics'
-        isLeech:
-          $ref: '#/components/schemas/CardIsLeech'
     CardContentElements:
       type: array
       minItems: 1
@@ -1054,6 +1033,10 @@ components:
       type: integer
       format: int32
       description: "Number of card reviews"
+    DeckTotalCards:
+      type: integer
+      format: int32
+      description: "Number ot cards in the deck"
 
   parameters:
     exerciseIdPathParam:
