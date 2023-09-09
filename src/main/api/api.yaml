@@ -1046,7 +1046,7 @@ components:
           $ref: '#/components/schemas/CardReviewsStatistic'
     CardIsLeech:
       type: boolean
-      description: "Indicates whether the card is a leech (Leech is a card which user was not able to memorize after x attempts and should improved)"
+      description: "Indicates whether the card is a leech (Leech is a card which should be improved as user was not able to memorize after x attempts)"
     CardFailsStatistic:
       type: integer
       format: int32
