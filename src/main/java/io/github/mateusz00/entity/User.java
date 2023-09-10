@@ -27,9 +27,9 @@ public class User {
     private String id;
     private String password;
     private Set<UserRole> roles;
-    @Indexed
+    @Indexed(unique = true)
     private String username;
-    @Indexed
+    @Indexed(unique = true)
     private String email;
 
     public Collection<SimpleGrantedAuthority> getGrantedAuthorities() {
