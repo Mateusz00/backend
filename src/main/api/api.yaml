@@ -28,12 +28,45 @@ paths:
               description: "JWT Bearer token, use it for subsequent requests"
         '400':
           description: Bad Request
+  /accounts/password-resets/token:
+    post:
+      tags:
+        - Accounts
+      summary: Send password reset token
+      operationId: createPasswordResetToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetTokenRequest'
+      responses:
+        '204':
+          description: No content
+        '400':
+          description: Bad Request
+  /accounts/password-resets:
+    post:
+      tags:
+        - Accounts
+      summary: Verify password reset token
+      operationId: verifyPasswordResetToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+      responses:
+        '204':
+          description: No content
+        '400':
+          description: Bad Request
 
   /decks:
     post:
       tags:
         - Decks
       summary: "Create deck"
+      description: "Language and name is required when sharedDeckId is not provided"
       operationId: createDeck
       requestBody:
         content:
@@ -57,6 +90,8 @@ paths:
       summary: "List decks"
       operationId: listDecks
       parameters:
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/pageOffsetQueryParam'
         - $ref: '#/components/parameters/isoLanguageCodeQueryParam'
       responses:
         "200":
@@ -67,11 +102,27 @@ paths:
                 $ref: "#/components/schemas/DecksPage"
         '401':
           description: Unauthorized
-        '404':
-          description: Not found
+        '400':
+          description: Bad request
   /decks/{deckId}:
     parameters:
       - $ref: '#/components/parameters/deckIdPathParam'
+    get:
+      tags:
+        - Decks
+      summary: "Get deck"
+      operationId: getDeck
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deck"
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not found
     put:
       tags:
         - Decks
@@ -104,6 +155,150 @@ paths:
         '401':
           description: Unauthorized
 
+  /shared/decks:
+    post:
+      tags:
+        - Shared Decks
+      summary: "Create shared deck"
+      operationId: createSharedDeck
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SharedDeckCreateRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedDeck"
+        '401':
+          description: Unauthorized
+        '400':
+          description: Bad request
+    get:
+      tags:
+        - Shared Decks
+      summary: "List shared decks"
+      operationId: listSharedDecks
+      parameters:
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/pageOffsetQueryParam'
+        - $ref: '#/components/parameters/isoLanguageCodeQueryParam'
+        - $ref: '#/components/parameters/sharedDecksSortByQueryParam'
+        - $ref: '#/components/parameters/sharedDecksTagFilterQueryParam'
+        - $ref: '#/components/parameters/sharedDecksNameFilterQueryParam'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedDecksPage"
+        '401':
+          description: Unauthorized
+        '400':
+          description: Bad request
+  /shared/decks/{sharedDeckId}:
+    parameters:
+      - $ref: '#/components/parameters/sharedDeckIdPathParam'
+    get:
+      tags:
+        - Shared Decks
+      summary: "Get shared deck"
+      operationId: getSharedDeck
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedDeck"
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not found
+    put:
+      tags:
+        - Shared Decks
+      summary: "Update shared deck"
+      operationId: updateSharedDeck
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SharedDeckUpdateRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedDeck"
+        '401':
+          description: Unauthorized
+        '400':
+          description: Bad request
+    delete:
+      tags:
+        - Shared Decks
+      summary: "Delete shared deck"
+      operationId: deleteSharedDeck
+      responses:
+        "204":
+          description: No content
+        '401':
+          description: Unauthorized
+  /shared/decks/{deckId}/cards:
+    parameters:
+      - $ref: '#/components/parameters/deckIdPathParam'
+    get:
+      tags:
+        - Shared Decks
+      summary: "List shared cards"
+      operationId: listSharedCards
+      parameters:
+        - $ref: '#/components/parameters/cardsLimitQueryParam'
+        - $ref: '#/components/parameters/pageOffsetQueryParam'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedCardsPage"
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not found
+        '400':
+          description: Bad request
+
+  /decks/{deckId}/statistics:
+    parameters:
+      - $ref: '#/components/parameters/deckIdPathParam'
+    get:
+      tags:
+        - Decks
+      summary: "Get deck statistics"
+      operationId: getDeckStatistics
+      parameters:
+        - $ref: '#/components/parameters/statisticsIntervalQueryParam'
+        - $ref: '#/components/parameters/statisticsDateRangeStartQueryParam'
+        - $ref: '#/components/parameters/statisticsDateRangeEndQueryParam'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeckStatistics"
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not found
+
   /decks/{deckId}/cards:
     parameters:
       - $ref: '#/components/parameters/deckIdPathParam'
@@ -134,6 +329,8 @@ paths:
       summary: "List cards"
       operationId: listCards
       parameters:
+        - $ref: '#/components/parameters/cardsLimitQueryParam'
+        - $ref: '#/components/parameters/pageOffsetQueryParam'
         - $ref: '#/components/parameters/cardSortByQueryParam'
         - $ref: '#/components/parameters/cardShowOnlyQueryParam'
       responses:
@@ -147,6 +344,8 @@ paths:
           description: Unauthorized
         '404':
           description: Not found
+        '400':
+          description: Bad request
   /decks/{deckId}/cards/{cardId}:
     parameters:
       - $ref: '#/components/parameters/deckIdPathParam'
@@ -172,6 +371,22 @@ paths:
           description: Unauthorized
         '400':
           description: Bad request
+    get:
+      tags:
+        - Cards
+      summary: "Get card"
+      operationId: getCard
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Card"
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not found
     delete:
       tags:
         - Cards
@@ -243,9 +458,9 @@ paths:
     put:
       tags:
         - Settings
-      summary: "Update user grammar settings"
-      description: "Update grammar settings of the user from the JWT"
-      operationId: updateUserGrammarSettings
+      summary: "Upsert user grammar settings"
+      description: "Upsert grammar settings of the user from the JWT"
+      operationId: upsertUserGrammarSettings
       requestBody:
         content:
           application/json:
@@ -290,6 +505,23 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ScheduledGrammarExercises"
+        '401':
+          description: Unauthorized
+  /schedule/{deckId}/cards:
+    parameters:
+      - $ref: '#/components/parameters/deckIdPathParam'
+    get:
+      tags:
+        - Schedule
+      summary: "Get scheduled cards"
+      operationId: getScheduledCards
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduledCardReviews"
         '401':
           description: Unauthorized
 
@@ -656,9 +888,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GrammarExerciseId'
-
-                #TODO deck settings /decks/ID/settings
-    UserSettings: # TODO Enabling of useCases + grammarSettings (maybe separate endpoint like: /settings/grammar (POST=filter inside body GET=query))
+    UserSettings:
       type: object
       required:
         - siteSettings
@@ -862,9 +1092,6 @@ components:
           $ref: '#/components/schemas/UserDeckSettings'
     DeckCreateRequest:
       type: object
-      required:
-        - name
-        - language
       properties:
         name:
           $ref: '#/components/schemas/DeckName'
@@ -910,6 +1137,8 @@ components:
           $ref: '#/components/schemas/IsoLanguageCode'
         cardsTotal:
           $ref: '#/components/schemas/DeckTotalCards'
+        waitingReviews:
+          $ref: '#/components/schemas/DeckWaitingReviews'
     DeckName:
       type: string
     SharedDeckId:
@@ -997,6 +1226,7 @@ components:
       description: "For MEDIA type: expects URL to resource (Upload using [this](#tag/Resources/operation/uploadResource) endpoint)"
     CardStatus:
       type: string
+      description: "Cards go from REVIEWED_YOUNG to REVIEWED_OLD after the interval is bigger than 30 days"
       enum:
         - NOT_SEEN
         - REVIEWED_YOUNG
@@ -1037,6 +1267,195 @@ components:
       type: integer
       format: int32
       description: "Number ot cards in the deck"
+    DateRangeParam:
+      type: string
+      description: "Date in YYYY-MM-DD format, if interval interval is set to MONTHLY then days are ignored"
+      example: "2023-09-22"
+    DeckStatistics:
+      type: object
+      properties:
+        statistics:
+          $ref: '#/components/schemas/DeckStatisticsEntries'
+    DeckStatisticsEntries:
+      type: array
+      items:
+        $ref: '#/components/schemas/DeckStatisticsEntry'
+    DeckStatisticsEntry:
+      type: object
+      properties:
+        index:
+          $ref: '#/components/schemas/DeckStatisticsEntryIndex'
+        hard:
+          $ref: '#/components/schemas/DeckStatisticsEntryHard'
+        normal:
+          $ref: '#/components/schemas/DeckStatisticsEntryNormal'
+        easy:
+          $ref: '#/components/schemas/DeckStatisticsEntryEasy'
+        wrong:
+          $ref: '#/components/schemas/DeckStatisticsEntryWrong'
+        suspended:
+          $ref: '#/components/schemas/DeckStatisticsEntrySuspended'
+    DeckStatisticsEntryIndex:
+      type: string
+      description: "For the DAYS interval, it indicates the day counting from 1 (For MONTHLY = month)"
+    DeckStatisticsEntryHard:
+      type: string
+      description: "Number of the times 'hard' was selected as the answer"
+    DeckStatisticsEntryNormal:
+      type: string
+      description: "Number of the times 'normal' was selected as the answer"
+    DeckStatisticsEntryEasy:
+      type: string
+      description: "Number of the times 'easy' was selected as the answer"
+    DeckStatisticsEntryWrong:
+      type: string
+      description: "Number of the times 'wrong' was selected as the answer"
+    DeckStatisticsEntrySuspended:
+      type: string
+      description: "Number of suspended cards"
+    ScheduledCardReviews:
+      type: object
+      properties:
+        total:
+          $ref: '#/components/schemas/ItemsTotal'
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardId'
+    DeckWaitingReviews:
+      type: integer
+      format: int32
+      description: "Number of reviews scheduled for today"
+    SharedDeckCreateRequest:
+      type: object
+      required:
+        - name
+        - language
+      properties:
+        name:
+          $ref: '#/components/schemas/SharedDeckName'
+        language:
+          $ref: '#/components/schemas/IsoLanguageCode'
+        tags:
+          $ref: '#/components/schemas/SharedDeckTags'
+        description:
+          $ref: '#/components/schemas/SharedDeckDescription'
+    SharedDeck:
+      type: object
+      properties:
+        ownerUsername:
+          $ref: '#/components/schemas/SharedDeckOwnerUsername'
+        sharedAt:
+          $ref: '#/components/schemas/SharedDeckSharedAtDate'
+        name:
+          $ref: '#/components/schemas/SharedDeckName'
+        language:
+          $ref: '#/components/schemas/IsoLanguageCode'
+        tags:
+          $ref: '#/components/schemas/SharedDeckTags'
+        description:
+          $ref: '#/components/schemas/SharedDeckDescription'
+        cardCount:
+          $ref: '#/components/schemas/SharedDeckCardCount'
+        popularity:
+          $ref: '#/components/schemas/SharedDeckPopularity'
+    SharedDeckOwnerUsername:
+      type: string
+    SharedDeckSharedAtDate:
+      type: string
+    SharedDeckName:
+      type: string
+      maxLength: 100
+    SharedDeckTags:
+      type: array
+      maxItems: 30
+      items:
+        $ref: '#/components/schemas/SharedDeckTag'
+    SharedDeckTag:
+      type: string
+      maxLength: 100
+    SharedDeckDescription:
+      type: string
+      maxLength: 100000
+    SharedDeckCardCount:
+      type: integer
+      format: int32
+    SharedDeckPopularity:
+      type: integer
+      format: int32
+    SharedDecksPage:
+      allOf:
+        - $ref: '#/components/schemas/PageBase'
+        - type: object
+          properties:
+            decks:
+              type: array
+              items:
+                $ref: '#/components/schemas/SharedDeckSearchResult'
+    SharedDeckUpdateRequest:
+      type: object
+      required:
+        - name
+        - language
+      properties:
+        name:
+          $ref: '#/components/schemas/SharedDeckName'
+        language:
+          $ref: '#/components/schemas/IsoLanguageCode'
+        tags:
+          $ref: '#/components/schemas/SharedDeckTags'
+        description:
+          $ref: '#/components/schemas/SharedDeckDescription'
+    SharedDeckSearchResult:
+      type: object
+      properties:
+        sharedAt:
+          $ref: '#/components/schemas/SharedDeckSharedAtDate'
+        name:
+          $ref: '#/components/schemas/SharedDeckName'
+        language:
+          $ref: '#/components/schemas/IsoLanguageCode'
+        tags:
+          $ref: '#/components/schemas/SharedDeckTags'
+        cardCount:
+          $ref: '#/components/schemas/SharedDeckCardCount'
+        popularity:
+          $ref: '#/components/schemas/SharedDeckPopularity'
+    SharedCard:
+      type: object
+      properties:
+        front:
+          $ref: '#/components/schemas/CardContentElements'
+        back:
+          $ref: '#/components/schemas/CardContentElements'
+    SharedCardsPage:
+      allOf:
+        - $ref: '#/components/schemas/PageBase'
+        - type: object
+          properties:
+            cards:
+              type: array
+              items:
+                $ref: '#/components/schemas/SharedCard'
+    PasswordResetTokenRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          $ref: '#/components/schemas/AccountEmail'
+    PasswordResetRequest:
+      type: object
+      required:
+        - token
+        - newPassword
+      properties:
+        token:
+          $ref: '#/components/schemas/PasswordResetToken'
+        newPassword:
+          $ref: '#/components/schemas/AccountPassword'
+    PasswordResetToken:
+      type: string
 
   parameters:
     exerciseIdPathParam:
@@ -1092,6 +1511,17 @@ components:
         minimum: 1
         maximum: 100
         default: 100
+    cardsLimitQueryParam:
+      name: limit
+      in: query
+      description: "The maximum number of entries to return"
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 30
+        default: 30
     grammarSettingIdQueryParam:
       name: grammarSettingId
       in: query
@@ -1105,6 +1535,13 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/DeckId'
+    sharedDeckIdPathParam:
+      name: deckId
+      in: path
+      description: 'Unique ID of the shared deck'
+      required: true
+      schema:
+        $ref: '#/components/schemas/SharedDeckId'
     cardIdPathParam:
       name: cardId
       in: path
@@ -1133,3 +1570,49 @@ components:
           - NOT_SEEN
           - REVIEWED_YOUNG
           - REVIEWED_OLD
+    statisticsIntervalQueryParam:
+      name: interval
+      in: query
+      required: true
+      description: |
+        The interval at which statistics should be presented. If date range query param is not provided then API will return statistics for:
+        * MONTHLY = last 12 months 
+        * DAILY = all days of the current month
+      schema:
+        type: string
+        enum:
+          - MONTHLY
+          - DAILY
+    statisticsDateRangeStartQueryParam:
+      name: dateRangeStart
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/DateRangeParam'
+    statisticsDateRangeEndQueryParam:
+      name: dateRangeEnd
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/DateRangeParam'
+    sharedDecksSortByQueryParam:
+      name: sortBy
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - CARD_COUNT
+          - POPULARITY
+    sharedDecksTagFilterQueryParam:
+      name: tag
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/SharedDeckTag'
+    sharedDecksNameFilterQueryParam:
+      name: name
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/SharedDeckName'
