@@ -1141,6 +1141,7 @@ components:
           $ref: '#/components/schemas/DeckWaitingReviews'
     DeckName:
       type: string
+      maxLength: 100
     SharedDeckId:
       type: string
     IsoLanguageCode:
@@ -1333,7 +1334,7 @@ components:
         - language
       properties:
         name:
-          $ref: '#/components/schemas/SharedDeckName'
+          $ref: '#/components/schemas/DeckName'
         language:
           $ref: '#/components/schemas/IsoLanguageCode'
         tags:
@@ -1348,7 +1349,7 @@ components:
         sharedAt:
           $ref: '#/components/schemas/SharedDeckSharedAtDate'
         name:
-          $ref: '#/components/schemas/SharedDeckName'
+          $ref: '#/components/schemas/DeckName'
         language:
           $ref: '#/components/schemas/IsoLanguageCode'
         tags:
@@ -1363,9 +1364,6 @@ components:
       type: string
     SharedDeckSharedAtDate:
       type: string
-    SharedDeckName:
-      type: string
-      maxLength: 100
     SharedDeckTags:
       type: array
       maxItems: 30
@@ -1399,7 +1397,7 @@ components:
         - language
       properties:
         name:
-          $ref: '#/components/schemas/SharedDeckName'
+          $ref: '#/components/schemas/DeckName'
         language:
           $ref: '#/components/schemas/IsoLanguageCode'
         tags:
@@ -1412,7 +1410,7 @@ components:
         sharedAt:
           $ref: '#/components/schemas/SharedDeckSharedAtDate'
         name:
-          $ref: '#/components/schemas/SharedDeckName'
+          $ref: '#/components/schemas/DeckName'
         language:
           $ref: '#/components/schemas/IsoLanguageCode'
         tags:
@@ -1615,4 +1613,4 @@ components:
       in: query
       required: false
       schema:
-        $ref: '#/components/schemas/SharedDeckName'
+        $ref: '#/components/schemas/DeckName'
