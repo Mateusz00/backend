@@ -6,11 +6,11 @@ import java.util.regex.Pattern;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import io.github.mateusz00.api.model.AccountRegistration;
 import io.github.mateusz00.configuration.UserRole;
 import io.github.mateusz00.dao.UserRepository;
 import io.github.mateusz00.entity.User;
 import io.github.mateusz00.exception.BadRequestException;
-import io.github.mateusz00.model.AccountRegistration;
 import lombok.RequiredArgsConstructor;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;

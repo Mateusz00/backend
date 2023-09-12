@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,11 +27,11 @@ public class GlobalRestExceptionHandler
     public ResponseEntity<ApiErrorResponse> exceptionHandler(MethodArgumentNotValidException e) {
         var msg = Optional.of(e)
                 .map(BindException::getBindingResult)
-                .map(Errors::getAllErrors)
+                .map(Errors::getFieldErrors)
                 .stream()
                 .flatMap(Collection::stream)
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .collect(Collectors.joining(".\n"));
+                .map(objectError -> objectError.getField() + "=" + objectError.getDefaultMessage())
+                .collect(Collectors.joining(". "));
         var apiErrorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST.value(), msg);
         return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
     }

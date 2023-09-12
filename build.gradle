@@ -24,6 +24,11 @@ configurations {
 	}
 }
 
+compileJava {
+	options.compilerArgs << "-Amapstruct.defaultComponentModel=spring"
+	options.compilerArgs << '-Amapstruct.unmappedTargetPolicy=ERROR'
+}
+
 compileJava.dependsOn tasks.named("openApiGenerate")
 tasks.named('openApiGenerate') {
 
@@ -31,7 +36,7 @@ tasks.named('openApiGenerate') {
 	inputSpec  = project.layout.projectDirectory.dir("src/main/api/api.yaml").toString()
 	outputDir = "$buildDir/openapi"
 	apiPackage = "io.github.mateusz00.api"
-	modelPackage = "io.github.mateusz00.model"
+	modelPackage = "io.github.mateusz00.api.model"
 	configOptions = [
 			dateLibrary: "java8",
 			interfaceOnly: "true",
@@ -52,6 +57,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.apache.commons:commons-lang3'
+	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
 
 	implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
 	implementation 'com.auth0:java-jwt:4.4.0'
@@ -60,6 +66,7 @@ dependencies {
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'

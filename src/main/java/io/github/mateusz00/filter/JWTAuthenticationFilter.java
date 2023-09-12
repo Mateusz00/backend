@@ -1,5 +1,6 @@
 package io.github.mateusz00.filter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -8,7 +9,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.mateusz00.model.AccountLogin;
+import io.github.mateusz00.api.model.AccountLogin;
 import io.github.mateusz00.service.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +27,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @SneakyThrows
     public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res) throws AuthenticationException {
         AccountLogin credentials = OBJECT_MAPPER.readValue(req.getInputStream(), AccountLogin.class);
-        return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(credentials.getUsername(), credentials.getPassword()));
+        var token = UsernamePasswordAuthenticationToken.unauthenticated(StringUtils.trim(credentials.getUsername()), StringUtils.trim(credentials.getPassword()));
+        return authenticationManager.authenticate(token);
     }
 
     @Override
