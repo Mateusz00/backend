@@ -1330,22 +1330,28 @@ components:
         suspended:
           $ref: '#/components/schemas/DeckStatisticsEntrySuspended'
     DeckStatisticsEntryIndex:
-      type: string
+      type: integer
+      format: int32
       description: "For the DAYS interval, it indicates the day counting from 1 (For MONTHLY = month)"
     DeckStatisticsEntryHard:
-      type: string
+      type: integer
+      format: int32
       description: "Number of the times 'hard' was selected as the answer"
     DeckStatisticsEntryNormal:
-      type: string
+      type: integer
+      format: int32
       description: "Number of the times 'normal' was selected as the answer"
     DeckStatisticsEntryEasy:
-      type: string
+      type: integer
+      format: int32
       description: "Number of the times 'easy' was selected as the answer"
     DeckStatisticsEntryWrong:
-      type: string
+      type: integer
+      format: int32
       description: "Number of the times 'wrong' was selected as the answer"
     DeckStatisticsEntrySuspended:
-      type: string
+      type: integer
+      format: int32
       description: "Number of suspended cards"
     ScheduledCardReviews:
       type: object
