@@ -1,6 +1,7 @@
 package io.github.mateusz00.entity;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -13,14 +14,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Deck
+public class UserSettings
 {
     @Id
     private String id;
-    private String sharedDeckId;
-    private String name;
+    @Indexed(unique = true)
     private String userId;
-    private String language;
-    private CustomDeckSettings customSettings;
-    private DeckSettings effectiveSettings;
+    private UserSiteSettings siteSettings;
+    private DeckSettings defaultDecksSettings;
+    private GrammarSettingsDetails defaultGrammarSettings;
 }

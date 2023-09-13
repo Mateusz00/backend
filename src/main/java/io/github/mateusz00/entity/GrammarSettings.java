@@ -13,14 +13,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Deck
+public class GrammarSettings
 {
     @Id
     private String id;
-    private String sharedDeckId;
-    private String name;
+    private SupportedLanguage language;
     private String userId;
-    private String language;
-    private CustomDeckSettings customSettings;
-    private DeckSettings effectiveSettings;
+    private String grammar;
+    private CustomGrammarSettingsDetails settings;
 }

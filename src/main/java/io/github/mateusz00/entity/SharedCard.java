@@ -1,5 +1,7 @@
 package io.github.mateusz00.entity;
 
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -13,14 +15,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Deck
+public class SharedCard
 {
     @Id
     private String id;
     private String sharedDeckId;
-    private String name;
-    private String userId;
-    private String language;
-    private CustomDeckSettings customSettings;
-    private DeckSettings effectiveSettings;
+    private List<CardContent> front;
+    private List<CardContent> back;
 }

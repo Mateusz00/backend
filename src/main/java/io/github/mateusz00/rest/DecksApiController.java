@@ -10,8 +10,8 @@ import io.github.mateusz00.api.model.DeckStatistics;
 import io.github.mateusz00.api.model.DeckUpdateRequest;
 import io.github.mateusz00.api.model.DecksPage;
 import io.github.mateusz00.mapper.DeckMapper;
-import io.github.mateusz00.service.DeckService;
 import io.github.mateusz00.service.UserProvider;
+import io.github.mateusz00.service.deck.DeckService;
 import lombok.RequiredArgsConstructor;
 
 @RestController

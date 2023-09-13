@@ -13,13 +13,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DeckSettings
 {
-    private Integer newCardsPerDay;
-    private Float easyRate;
-    private Float hardRate;
-    private Integer maxInterval;
-    private Integer minInterval;
-    private Float globalEaseModifier;
-    private Float intervalRateAfterFail;
-    private Integer leechThreshold;
+    private int newCardsPerDay;
+    private float easyRate;
+    private float hardRate;
+    private int maxInterval;
+    private int minInterval;
+    private float globalEaseModifier;
+    private float intervalRateAfterFail;
+    private int leechThreshold;
     private List<Integer> newCardSteps;
 }
