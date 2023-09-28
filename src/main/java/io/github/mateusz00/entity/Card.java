@@ -4,34 +4,38 @@ import java.time.Instant;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Document
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@TypeAlias("Card")
 public class Card
 {
     @Id
     private String id;
     @Indexed
+    @NonNull
     private String deckId;
     private List<CardContent> front;
     private List<CardContent> back;
-    private CardStatus status;
+    @NonNull
+    private CardStatus status = CardStatus.NOT_SEEN;
     @Indexed
     private Instant nextReview;
-    private float easeRate;
-    private int interval;
-    private boolean isSuspended;
+    private float easeRate = 1.f;
+    private int interval = 0;
+    private boolean suspended;
     private Integer currentStep;
-    private CardStatistics statistics;
-    private boolean isLeech;
+    @NonNull
+    private CardStatistics statistics = new CardStatistics();
+    private boolean leech = false;
 }

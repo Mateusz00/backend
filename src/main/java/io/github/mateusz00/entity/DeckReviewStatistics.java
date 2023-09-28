@@ -3,8 +3,10 @@ package io.github.mateusz00.entity;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.lang.Nullable;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +23,7 @@ import lombok.NoArgsConstructor;
         def = "{'deckId': 1, 'year': 1, 'month': 1}",
         unique = true
 )
+@TypeAlias("DeckReviewStatistics")
 public class DeckReviewStatistics
 {
     @Id
@@ -28,6 +31,8 @@ public class DeckReviewStatistics
     private String deckId;
     private int year;
     private int month;
-    private DeckReviewStatisticsEntry monthSummary;
+    @Nullable
+    private DeckReviewStatisticsSummary monthSummary;
+    @Nullable
     private List<DeckReviewStatisticsEntry> reviews;
 }

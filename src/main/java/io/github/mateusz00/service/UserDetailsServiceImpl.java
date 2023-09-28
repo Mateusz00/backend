@@ -9,7 +9,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import io.github.mateusz00.configuration.CustomUser;
-import io.github.mateusz00.configuration.CustomUserDetails;
 import io.github.mateusz00.configuration.UserRole;
 import io.github.mateusz00.dao.UserRepository;
 import io.github.mateusz00.entity.User;
@@ -24,10 +23,9 @@ public class UserDetailsServiceImpl implements UserDetailsService
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
     {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Username: " + username + " not found!"));
-        var details = new CustomUserDetails(user.getId(), user.getEmail(), user.getRoles());
-        return new CustomUser(user.getUsername(), user.getPassword(), getGrantedAuthorities(user.getRoles()), details);
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException(""));
+        return new CustomUser(user.getUsername(), user.getPassword(), getGrantedAuthorities(user.getRoles()), user.getId(), user.getEmail(), user.getRoles());
     }
 
     public static Collection<SimpleGrantedAuthority> getGrantedAuthorities(Collection<UserRole> roles) {

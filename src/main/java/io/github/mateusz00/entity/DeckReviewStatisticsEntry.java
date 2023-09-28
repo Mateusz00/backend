@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DeckReviewStatisticsEntry
 {
+    private int day;
     private int hard;
     private int normal;
     private int easy;

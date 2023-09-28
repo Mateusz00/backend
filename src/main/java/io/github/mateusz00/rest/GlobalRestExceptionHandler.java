@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import io.github.mateusz00.exception.ApiErrorResponse;
+import io.github.mateusz00.exception.AuthorizationException;
 import io.github.mateusz00.exception.BadRequestException;
 import io.github.mateusz00.exception.InternalException;
+import io.github.mateusz00.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -36,13 +38,19 @@ public class GlobalRestExceptionHandler
         return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ UsernameNotFoundException.class })
-    public ResponseEntity<ApiErrorResponse> authHandler(UsernameNotFoundException e) {
-        var apiErrorResponse = new ApiErrorResponse(HttpStatus.UNAUTHORIZED.value(), "You must be authorized");
-        return new ResponseEntity<>(apiErrorResponse, HttpStatus.UNAUTHORIZED);
+    @ExceptionHandler({ AuthorizationException.class })
+    public ResponseEntity<ApiErrorResponse> genericHandler403(Exception e) {
+        var apiErrorResponse = new ApiErrorResponse(HttpStatus.FORBIDDEN.value(), "You must be authorized");
+        return new ResponseEntity<>(apiErrorResponse, HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler({ BadRequestException.class })
+    @ExceptionHandler({ NotFoundException.class })
+    public ResponseEntity<ApiErrorResponse> genericHandler404(Exception e) {
+        var apiErrorResponse = new ApiErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
+        return new ResponseEntity<>(apiErrorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({ BadRequestException.class, UsernameNotFoundException.class })
     public ResponseEntity<ApiErrorResponse> exceptionHandlerBadRequest(BadRequestException e) {
         var apiErrorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
         return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);

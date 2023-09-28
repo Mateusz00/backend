@@ -13,10 +13,10 @@ public class UserProvider
     {
         var user = (CustomUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return UserInfo.builder()
-                .userId(user.getDetails().userId())
-                .email(user.getDetails().email())
+                .userId(user.getUserId())
+                .email(user.getEmail())
                 .username(user.getUsername())
-                .roles(user.getDetails().roles())
+                .roles(user.getRoles())
                 .build();
     }
 }

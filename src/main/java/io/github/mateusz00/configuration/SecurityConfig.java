@@ -48,7 +48,7 @@ public class SecurityConfig
         http.authorizeHttpRequests(config -> config
                 .requestMatchers("/login").anonymous()
                 .requestMatchers("/accounts").anonymous()
-                .requestMatchers("/decks").authenticated()
+                .requestMatchers("/decks/**").authenticated()
                 .anyRequest().denyAll()
         );
 

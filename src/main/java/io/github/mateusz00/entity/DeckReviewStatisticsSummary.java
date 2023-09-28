@@ -9,10 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CardStatistics
+public class DeckReviewStatisticsSummary
 {
-    @Builder.Default
-    private int fails = 0;
-    @Builder.Default
-    private int reviews = 0;
+    private int hard;
+    private int normal;
+    private int easy;
+    private int wrong;
+    private int suspended;
 }

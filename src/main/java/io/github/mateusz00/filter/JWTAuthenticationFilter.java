@@ -27,7 +27,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @SneakyThrows
     public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res) throws AuthenticationException {
         AccountLogin credentials = OBJECT_MAPPER.readValue(req.getInputStream(), AccountLogin.class);
-        var token = UsernamePasswordAuthenticationToken.unauthenticated(StringUtils.trim(credentials.getUsername()), StringUtils.trim(credentials.getPassword()));
+        var token = UsernamePasswordAuthenticationToken.unauthenticated(StringUtils.trim(credentials.getEmail()), StringUtils.trim(credentials.getPassword()));
         return authenticationManager.authenticate(token);
     }
 

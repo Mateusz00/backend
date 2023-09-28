@@ -6,4 +6,5 @@ import io.github.mateusz00.entity.Card;
 
 public interface CardRepository extends MongoRepository<Card, String>
 {
+    void deleteAllByDeckId(String deckId);
 }

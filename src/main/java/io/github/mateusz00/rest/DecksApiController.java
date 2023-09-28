@@ -11,6 +11,7 @@ import io.github.mateusz00.api.model.DeckUpdateRequest;
 import io.github.mateusz00.api.model.DecksPage;
 import io.github.mateusz00.mapper.DeckMapper;
 import io.github.mateusz00.service.UserProvider;
+import io.github.mateusz00.service.deck.DeckQuery;
 import io.github.mateusz00.service.deck.DeckService;
 import lombok.RequiredArgsConstructor;
 
@@ -25,37 +26,45 @@ public class DecksApiController implements DecksApi
     @Override
     public ResponseEntity<Deck> createDeck(DeckCreateRequest deckCreateRequest)
     {
-        Deck deck = deckMapper.map(deckService.createNewDeck(deckCreateRequest, userProvider.getUser().userId()));
+        Deck deck = deckMapper.map(deckService.createDeck(deckCreateRequest, userProvider.getUser().userId()));
         return ResponseEntity.ok(deck);
     }
 
     @Override
     public ResponseEntity<Void> deleteDeck(String deckId)
     {
-        return null;
+        deckService.deleteDeck(deckId, userProvider.getUser());
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     public ResponseEntity<Deck> getDeck(String deckId)
     {
-        return null;
+        Deck deck = deckMapper.map(deckService.getDeck(deckId, userProvider.getUser()));
+        return ResponseEntity.ok(deck);
     }
 
     @Override
     public ResponseEntity<DeckStatistics> getDeckStatistics(String deckId, String interval, String dateRangeStart, String dateRangeEnd)
     {
-        return null;
+        return null; // TODO
     }
 
     @Override
     public ResponseEntity<DecksPage> listDecks(Integer limit, Integer offset, String language)
     {
-        return null;
+        DecksPage decksPage = deckService.getPage(userProvider.getUser(), DeckQuery.builder()
+                .pageNumber(offset)
+                .pageSize(limit)
+                .language(language)
+                .build());
+        return ResponseEntity.ok(decksPage);
     }
 
     @Override
     public ResponseEntity<Deck> updateDeck(String deckId, DeckUpdateRequest deckUpdateRequest)
     {
-        return null;
+        Deck deck = deckMapper.map(deckService.updateDeck(deckId, deckUpdateRequest, userProvider.getUser()));
+        return ResponseEntity.ok(deck);
     }
 }

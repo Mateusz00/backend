@@ -21,5 +21,5 @@ public class DeckSettings
     private float globalEaseModifier;
     private float intervalRateAfterFail;
     private int leechThreshold;
-    private List<Integer> newCardSteps;
+    private List<Integer> newCardSteps; // plain int array?
 }

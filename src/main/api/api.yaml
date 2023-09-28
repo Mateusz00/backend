@@ -80,10 +80,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Deck"
-        '401':
-          description: Unauthorized
         '400':
           description: Bad request
+        '403':
+          description: Forbidden
     get:
       tags:
         - Decks
@@ -100,10 +100,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DecksPage"
-        '401':
-          description: Unauthorized
         '400':
           description: Bad request
+        '403':
+          description: Forbidden
   /decks/{deckId}:
     parameters:
       - $ref: '#/components/parameters/deckIdPathParam'
@@ -119,8 +119,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Deck"
-        '401':
-          description: Unauthorized
+        '403':
+          description: Forbidden
         '404':
           description: Not found
     put:
@@ -140,10 +140,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Deck"
-        '401':
-          description: Unauthorized
         '400':
           description: Bad request
+        '403':
+          description: Forbidden
     delete:
       tags:
         - Decks
@@ -152,8 +152,10 @@ paths:
       responses:
         "204":
           description: No content
-        '401':
-          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 
   /shared/decks:
     post:
@@ -173,10 +175,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SharedDeck"
-        '401':
-          description: Unauthorized
         '400':
           description: Bad request
+        '403':
+          description: Forbidden
     get:
       tags:
         - Shared Decks
@@ -196,10 +198,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SharedDecksPage"
-        '401':
-          description: Unauthorized
         '400':
           description: Bad request
+        '403':
+          description: Forbidden
   /shared/decks/{sharedDeckId}:
     parameters:
       - $ref: '#/components/parameters/sharedDeckIdPathParam'
@@ -215,8 +217,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SharedDeck"
-        '401':
-          description: Unauthorized
+        '403':
+          description: Forbidden
         '404':
           description: Not found
     put:
@@ -236,10 +238,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SharedDeck"
-        '401':
-          description: Unauthorized
         '400':
           description: Bad request
+        '403':
+          description: Forbidden
     delete:
       tags:
         - Shared Decks
@@ -248,8 +250,10 @@ paths:
       responses:
         "204":
           description: No content
-        '401':
-          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /shared/decks/{deckId}/cards:
     parameters:
       - $ref: '#/components/parameters/deckIdPathParam'
@@ -268,12 +272,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SharedCardsPage"
-        '401':
-          description: Unauthorized
-        '404':
-          description: Not found
         '400':
           description: Bad request
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 
   /decks/{deckId}/statistics:
     parameters:
@@ -294,8 +298,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DeckStatistics"
-        '401':
-          description: Unauthorized
+        '403':
+          description: Forbidden
         '404':
           description: Not found
 
@@ -319,10 +323,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Card"
-        '401':
-          description: Unauthorized
         '400':
           description: Bad request
+        '403':
+          description: Forbidden
     get:
       tags:
         - Cards
@@ -340,12 +344,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CardsPage"
-        '401':
-          description: Unauthorized
-        '404':
-          description: Not found
         '400':
           description: Bad request
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /decks/{deckId}/cards/{cardId}/review-answers:
     parameters:
       - $ref: '#/components/parameters/deckIdPathParam'
@@ -367,12 +371,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ScheduledCardReviews"
-        '401':
-          description: Unauthorized
-        '404':
-          description: Not found
         '400':
           description: Bad request
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 
   /decks/{deckId}/cards/{cardId}:
     parameters:
@@ -395,10 +399,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Card"
-        '401':
-          description: Unauthorized
         '400':
           description: Bad request
+        '403':
+          description: Forbidden
     get:
       tags:
         - Cards
@@ -411,8 +415,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Card"
-        '401':
-          description: Unauthorized
+        '403':
+          description: Forbidden
         '404':
           description: Not found
     delete:
@@ -423,8 +427,10 @@ paths:
       responses:
         "204":
           description: No content
-        '401':
-          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 
   /settings:
     get:
@@ -440,8 +446,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserSettings"
-        '401':
-          description: Unauthorized
+        '403':
+          description: Forbidden
     put:
       tags:
         - Settings
@@ -460,10 +466,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserSettings"
-        '401':
-          description: Unauthorized
         '400':
           description: Bad request
+        '403':
+          description: Forbidden
   /settings/grammar:
     get:
       tags:
@@ -481,8 +487,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserGrammarSettingsSearchResults"
-        '401':
-          description: Unauthorized
+        '403':
+          description: Forbidden
     put:
       tags:
         - Settings
@@ -501,10 +507,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserGrammarSettingsSearchResult"
-        '401':
-          description: Unauthorized
         '400':
           description: Bad request
+        '403':
+          description: Forbidden
     delete:
       tags:
         - Settings
@@ -516,8 +522,10 @@ paths:
       responses:
         "204":
           description: No content
-        '401':
-          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 
   /schedule/exercises:
     get:
@@ -533,8 +541,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ScheduledGrammarExercises"
-        '401':
-          description: Unauthorized
+        '403':
+          description: Forbidden
   /schedule/exercises/{exerciseId}:
     parameters:
       - $ref: '#/components/parameters/exerciseIdPathParam'
@@ -550,8 +558,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ScheduledGrammarExercise"
-        '401':
-          description: Unauthorized
+        '403':
+          description: Forbidden
         '404':
           description: Not found
   /schedule/{deckId}/cards:
@@ -569,8 +577,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ScheduledCardReviews"
-        '401':
-          description: Unauthorized
+        '403':
+          description: Forbidden
 
   /exercises:
     get:
@@ -662,6 +670,8 @@ paths:
           description: No content
         '403':
           description: Forbidden
+        '404':
+          description: Not found
   /resources:
     post:
       tags:
@@ -683,8 +693,8 @@ paths:
                 $ref: "#/components/schemas/FileDownloadResult"
         '400':
           description: Bad Request
-        '401':
-          description: Unauthorized
+        '403':
+          description: Forbidden
   /exercises/review-answers:
     post:
       tags:
@@ -700,8 +710,8 @@ paths:
       responses:
         '200':
           description: Answer was processed successfully
-        '401':
-          description: Unauthorized
+        '403':
+          description: Forbidden
 
   /login:
     post:
@@ -723,8 +733,8 @@ paths:
               schema:
                 type: string
               description: "JWT Bearer token, use it for subsequent requests"
-        '401':
-          description: Unauthorized
+        '400':
+          description: Bad request
 
 components:
   schemas:
@@ -753,11 +763,11 @@ components:
     AccountLogin:
       type: object
       required:
-        - username
+        - email
         - password
       properties:
-        username:
-          $ref: '#/components/schemas/AccountUsername'
+        email:
+          $ref: '#/components/schemas/AccountEmail'
         password:
           type: string
     GrammarExercise:
@@ -888,10 +898,8 @@ components:
       properties:
         limit:
           $ref: '#/components/schemas/Limit'
-        offset:
-          $ref: '#/components/schemas/PageItemsOffset'
         currentPage:
-          $ref: '#/components/schemas/PageIndex'
+          $ref: '#/components/schemas/PageOffset'
         pageTotal:
           $ref: '#/components/schemas/PageTotal'
         total:
@@ -900,13 +908,12 @@ components:
       type: integer
       format: int32
       description: "Current limit of items per page"
-    PageItemsOffset:
+    PageOffset:
       type: integer
       format: int32
       minimum: 0
-    PageIndex:
-      type: integer
-      format: int32
+      default: 0
+      description: "Zero-based page number"
     PageTotal:
       type: integer
       format: int32
@@ -1187,8 +1194,6 @@ components:
           $ref: '#/components/schemas/SharedDeckId'
         language:
           $ref: '#/components/schemas/IsoLanguageCode'
-        cardsTotal:
-          $ref: '#/components/schemas/DeckTotalCards'
         waitingReviews:
           $ref: '#/components/schemas/DeckWaitingReviews'
     DeckName:
@@ -1228,14 +1233,14 @@ components:
           $ref: '#/components/schemas/CardEaseRate'
         interval:
           $ref: '#/components/schemas/CardInterval'
-        isSuspended:
-          $ref: '#/components/schemas/CardIsSuspended'
+        suspended:
+          $ref: '#/components/schemas/CardSuspended'
         currentStep:
           $ref: '#/components/schemas/CardCurrentStep'
         statistics:
           $ref: '#/components/schemas/CardStatistics'
-        isLeech:
-          $ref: '#/components/schemas/CardIsLeech'
+        leech:
+          $ref: '#/components/schemas/CardLeech'
     CardsPage:
       allOf:
         - $ref: '#/components/schemas/PageBase'
@@ -1252,10 +1257,10 @@ components:
           $ref: '#/components/schemas/CardContentElements'
         back:
           $ref: '#/components/schemas/CardContentElements'
-        isSuspended:
-          $ref: '#/components/schemas/CardIsSuspended'
-        isLeech:
-          $ref: '#/components/schemas/CardIsLeech'
+        suspended:
+          $ref: '#/components/schemas/CardSuspended'
+        leech:
+          $ref: '#/components/schemas/CardLeech'
     CardContentElements:
       type: array
       minItems: 1
@@ -1295,7 +1300,7 @@ components:
       type: integer
       format: int32
       description: "Current interval in days"
-    CardIsSuspended:
+    CardSuspended:
       type: boolean
     CardCurrentStep:
       type: integer
@@ -1308,7 +1313,7 @@ components:
           $ref: '#/components/schemas/CardFailsStatistic'
         reviews:
           $ref: '#/components/schemas/CardReviewsStatistic'
-    CardIsLeech:
+    CardLeech:
       type: boolean
       description: "Indicates whether the card is a leech (Leech is a card which should be improved as user was not able to memorize after x attempts)"
     CardFailsStatistic:
@@ -1318,10 +1323,6 @@ components:
       type: integer
       format: int32
       description: "Number of card reviews"
-    DeckTotalCards:
-      type: integer
-      format: int32
-      description: "Number ot cards in the deck"
     DateRangeParam:
       type: string
       description: "Date in YYYY-MM-DD format, if interval interval is set to MONTHLY then days are ignored"
@@ -1585,10 +1586,10 @@ components:
     pageOffsetQueryParam:
       name: offset
       in: query
-      description: "The (zero-based) pagination offset"
+      description: "Zero-based page number"
       required: false
       schema:
-        $ref: '#/components/schemas/PageItemsOffset'
+        $ref: '#/components/schemas/PageOffset'
     limitQueryParam:
       name: limit
       in: query
@@ -1645,8 +1646,10 @@ components:
       schema:
         type: string
         enum:
-          - NEXT_REVIEW
-          - INTERVAL
+          - NEXT_REVIEW_ASC
+          - NEXT_REVIEW_DESC
+          - INTERVAL_ASC
+          - INTERVAL_DESC
     cardShowOnlyQueryParam:
       name: showOnly
       in: query
@@ -1691,8 +1694,10 @@ components:
       schema:
         type: string
         enum:
-          - CARD_COUNT
-          - POPULARITY
+          - CARD_COUNT_ASC
+          - CARD_COUNT_DESC
+          - POPULARITY_ASC
+          - POPULARITY_DESC
     sharedDecksTagFilterQueryParam:
       name: tag
       in: query

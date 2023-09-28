@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +19,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import io.github.mateusz00.configuration.CustomUser;
-import io.github.mateusz00.configuration.CustomUserDetails;
 import io.github.mateusz00.configuration.SecurityConstants;
 import io.github.mateusz00.configuration.UserRole;
 import io.github.mateusz00.exception.InternalException;
@@ -35,14 +35,14 @@ public class TokenService
 
     public String createToken(Authentication auth) {
         CustomUser user = (CustomUser) auth.getPrincipal();
-        return createToken(user.getUsername(), user.getDetails());
+        return createToken(user.getUsername(), user.getUserId(), user.getEmail(), user.getRoles());
     }
 
-    public String createToken(String username, CustomUserDetails details) {
+    public String createToken(String username, String userId, String email, Set<UserRole> roles) {
         String jwt = JWT.create()
-                .withClaim(ROLES_CLAIM, details.roles().stream().map(Enum::toString).toList())
-                .withClaim(USER_ID_CLAIM, details.userId())
-                .withClaim(EMAIL_CLAIM, details.email())
+                .withClaim(ROLES_CLAIM, roles.stream().map(Enum::toString).toList())
+                .withClaim(USER_ID_CLAIM, userId)
+                .withClaim(EMAIL_CLAIM, email)
                 .withSubject(username)
                 .withExpiresAt(new Date(System.currentTimeMillis() + securityConstants.getExpirationTime()))
                 .sign(Algorithm.HMAC512(securityConstants.getSecret()));
@@ -64,7 +64,7 @@ public class TokenService
         ensureJwtIsValid(username, roles, email, userId);
 
         Collection<SimpleGrantedAuthority> grantedAuthorities = UserDetailsServiceImpl.getGrantedAuthorities(roles);
-        var principal = new CustomUser(username, "JWT", grantedAuthorities, new CustomUserDetails(userId, email, new HashSet<>(roles)));
+        var principal = new CustomUser(username, "JWT", grantedAuthorities, userId, email, new HashSet<>(roles));
         var authToken = UsernamePasswordAuthenticationToken.authenticated(principal, null, grantedAuthorities);
         return Optional.of(authToken);
     }
