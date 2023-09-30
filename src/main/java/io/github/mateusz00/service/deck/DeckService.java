@@ -3,6 +3,7 @@ package io.github.mateusz00.service.deck;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -32,6 +33,7 @@ import io.github.mateusz00.mapper.DeckMapper;
 import io.github.mateusz00.service.deck.shared.SharedCardPageQuery;
 import io.github.mateusz00.service.deck.shared.SharedDeckService;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import static io.github.mateusz00.configuration.UserRole.ROLE_ADMIN;
@@ -49,7 +51,7 @@ public class DeckService
     private final DeckMapper deckMapper;
 
     public Deck createDeck(DeckCreateRequest deckCreateRequest, String userId)
-    {
+    {// TODO effective settings
         Deck deck = deckMapper.map(deckCreateRequest, userId);
         var newDeckId = new ObjectId();
         deck.setId(newDeckId.toString());
@@ -69,19 +71,26 @@ public class DeckService
         return savedDeck;
     }
 
+    @SneakyThrows
     private <T> void processBatchAsyncAndJoin(long itemCount, int batchSize, Function<Integer, T> supplier, Consumer<T> action)
     {
-        int partitions = (int) ((itemCount - 1) / batchSize) + 1;
-        List<CompletableFuture<Void>> features = new ArrayList<>(partitions);
-        for (int i = 0; i < partitions; i++)
+        try
         {
-            // TODO exception handling
-            final int currentPartition = i; // Variable used in lambda expression should be final or effectively final
-            CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> supplier.apply(currentPartition))
-                    .thenAccept(action);
-            features.add(future);
+            int partitions = (int) ((itemCount - 1) / batchSize) + 1;
+            List<CompletableFuture<Void>> features = new ArrayList<>(partitions);
+            for (int i = 0; i < partitions; i++)
+            {
+                final int currentPartition = i; // Variable used in lambda expression should be final or effectively final
+                CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> supplier.apply(currentPartition))
+                        .thenAccept(action);
+                features.add(future);
+            }
+            features.forEach(CompletableFuture::join);
         }
-        features.forEach(CompletableFuture::join);
+        catch (CompletionException e)
+        {
+            throw e.getCause(); // Unwrap exception for better handling
+        }
     }
 
     private Page<SharedCard> sharedCardPageSupplier(String sharedDeckId, int batchNumber, long cardCount)
@@ -125,7 +134,7 @@ public class DeckService
                 batchNumber -> cardPageSupplier(deckId, batchNumber),
                 page -> sharedDeckService.addCards(page.getContent(), newDeckId.toString()));
         long savedCards = sharedDeckService.getCardCount(newDeckId.toString());
-        return sharedDeckService.createDeck(user, sharedDeckCreateRequest, savedCards);
+        return sharedDeckService.createDeck(user, sharedDeckCreateRequest, savedCards, newDeckId.toString());
     }
 
     private Page<Card> cardPageSupplier(String deckId, int batchNumber)

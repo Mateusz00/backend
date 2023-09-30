@@ -19,6 +19,7 @@ import io.github.mateusz00.exception.AuthorizationException;
 import io.github.mateusz00.exception.BadRequestException;
 import io.github.mateusz00.exception.InternalException;
 import io.github.mateusz00.exception.NotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -50,8 +51,8 @@ public class GlobalRestExceptionHandler
         return new ResponseEntity<>(apiErrorResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({ BadRequestException.class, UsernameNotFoundException.class })
-    public ResponseEntity<ApiErrorResponse> exceptionHandlerBadRequest(BadRequestException e) {
+    @ExceptionHandler({ BadRequestException.class, UsernameNotFoundException.class, ConstraintViolationException.class })
+    public ResponseEntity<ApiErrorResponse> exceptionHandlerBadRequest(Exception e) {
         var apiErrorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
         return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
     }

@@ -23,23 +23,26 @@ public class CustomCardRepositoryImpl implements CustomCardRepository
     public Page<Card> listCards(CardPageQuery pageQuery)
     {
         var pageRequest = pageQuery.getPageRequest();
-        var query = new Query().with(pageRequest);
+        var query = new Query();
 
         query.addCriteria(new Criteria(DECK_ID).is(pageQuery.getDeckId()));
-        var statusCriteria = switch (pageQuery.getStatusQuery())
+        if (pageQuery.getStatusQuery() != null)
         {
-            case LEECH -> new Criteria(LEECH).is(true);
-            case SUSPENDED -> new Criteria(SUSPENDED).is(true);
-            default -> new Criteria(STATUS).is(pageQuery.getStatusQuery().name());
-        };
-        query.addCriteria(statusCriteria);
+            var statusCriteria = switch (pageQuery.getStatusQuery())
+                    {
+                        case LEECH -> new Criteria(LEECH).is(true);
+                        case SUSPENDED -> new Criteria(SUSPENDED).is(true);
+                        default -> new Criteria(STATUS).is(pageQuery.getStatusQuery().name());
+                    };
+            query.addCriteria(statusCriteria);
+        }
 
         long count = -1;
         if (pageQuery.isShouldGetTotal())
         {
              count = mongoTemplate.count(query, Card.class);
         }
-        var cards = mongoTemplate.find(query, Card.class);
+        var cards = mongoTemplate.find(query.with(pageRequest), Card.class);
         return new PageImpl<>(cards , pageRequest, count);
     }
 }

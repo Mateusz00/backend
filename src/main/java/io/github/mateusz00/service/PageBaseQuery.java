@@ -4,11 +4,13 @@ import javax.annotation.Nullable;
 
 import org.springframework.data.domain.PageRequest;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
 @Getter
 @SuperBuilder
+@EqualsAndHashCode
 public class PageBaseQuery
 {
     private final int pageNumber;

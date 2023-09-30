@@ -2,6 +2,8 @@ package io.github.mateusz00.service.deck.shared;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +41,7 @@ public class SharedDeckService
 
     public SharedDeck getDeck(String deckId)
     {
-        return sharedDeckRepository.findById(deckId).orElseThrow(NotFoundException::new);
+        return sharedDeckRepository.findById(deckId).orElseThrow(() -> new NotFoundException("Shared deck " + deckId + " does not exist!"));
     }
 
     public boolean doesDeckExist(String deckId)
@@ -54,9 +56,10 @@ public class SharedDeckService
         return sharedDeckRepository.save(deck);
     }
 
-    public SharedDeck createDeck(UserInfo user, SharedDeckCreateRequest sharedDeckCreateRequest, long cardCount)
+    public SharedDeck createDeck(UserInfo user, SharedDeckCreateRequest sharedDeckCreateRequest, long cardCount, @Nullable String sharedDeckId)
     {
         SharedDeck deck = sharedDeckMapper.map(sharedDeckCreateRequest, user.userId(), user.username(), cardCount);
+        deck.setId(sharedDeckId);
         return sharedDeckRepository.insert(deck);
     }
 

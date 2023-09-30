@@ -12,5 +12,5 @@ public interface SharedCardRepository extends MongoRepository<SharedCard, String
 
     long countBySharedDeckId(String sharedDeckId);
 
-    Page<SharedCard> findAllBySharedDeckId(String sharedDeckId, Pageable pageable);
+    Page<SharedCard> findBySharedDeckId(String sharedDeckId, Pageable pageable);
 }

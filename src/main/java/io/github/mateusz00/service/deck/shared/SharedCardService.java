@@ -35,7 +35,7 @@ class SharedCardService
 
     public Page<SharedCard> getCards(SharedCardPageQuery query)
     {
-        return sharedCardRepository.findAllBySharedDeckId(query.getSharedDeckId(), query.getPageRequest());
+        return sharedCardRepository.findBySharedDeckId(query.getSharedDeckId(), query.getPageRequest());
     }
 
     public long getCardCount(String deckId)
