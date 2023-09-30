@@ -84,6 +84,8 @@ paths:
           description: Bad request
         '403':
           description: Forbidden
+        '404':
+          description: Not found
     get:
       tags:
         - Decks
@@ -386,7 +388,7 @@ paths:
       tags:
         - Cards
       summary: "Update card"
-      operationId: updateCard
+      operationId: patchCard
       requestBody:
         content:
           application/json:
@@ -446,8 +448,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserSettings"
-        '403':
-          description: Forbidden
     put:
       tags:
         - Settings
@@ -468,8 +468,6 @@ paths:
                 $ref: "#/components/schemas/UserSettings"
         '400':
           description: Bad request
-        '403':
-          description: Forbidden
   /settings/grammar:
     get:
       tags:
@@ -848,7 +846,6 @@ components:
       enum:
         - POLISH
         - ENGLISH
-        - CHINESE
     Answer:
       type: string
     SubmittedExerciseReviewAnswer:
@@ -1142,7 +1139,7 @@ components:
         name:
           $ref: '#/components/schemas/DeckName'
         sharedDeckId:
-          $ref: '#/components/schemas/SharedDeckId'
+          $ref: '#/components/schemas/OriginSharedDeckId'
         language:
           $ref: '#/components/schemas/IsoLanguageCode'
         customSettings:
@@ -1155,11 +1152,9 @@ components:
         name:
           $ref: '#/components/schemas/DeckName'
         sharedDeckId:
-          $ref: '#/components/schemas/SharedDeckId'
+          $ref: '#/components/schemas/OriginSharedDeckId'
         language:
           $ref: '#/components/schemas/IsoLanguageCode'
-        customSettings:
-          $ref: '#/components/schemas/UserDeckSettings'
     DeckUpdateRequest:
       type: object
       required:
@@ -1191,7 +1186,7 @@ components:
         name:
           $ref: '#/components/schemas/DeckName'
         sharedDeckId:
-          $ref: '#/components/schemas/SharedDeckId'
+          $ref: '#/components/schemas/OriginSharedDeckId'
         language:
           $ref: '#/components/schemas/IsoLanguageCode'
         waitingReviews:
@@ -1201,6 +1196,9 @@ components:
       maxLength: 100
     SharedDeckId:
       type: string
+    OriginSharedDeckId:
+      type: string
+      description: "Id of the shared deck that was used to create this deck"
     IsoLanguageCode:
       type: string
       description: "ISO 639-1 code"
@@ -1396,6 +1394,8 @@ components:
         - name
         - language
       properties:
+        deckId:
+          $ref: '#/components/schemas/DeckId'
         name:
           $ref: '#/components/schemas/DeckName'
         language:
@@ -1610,8 +1610,8 @@ components:
         type: integer
         format: int32
         minimum: 1
-        maximum: 30
-        default: 30
+        maximum: 50
+        default: 20
     grammarSettingIdQueryParam:
       name: grammarSettingId
       in: query

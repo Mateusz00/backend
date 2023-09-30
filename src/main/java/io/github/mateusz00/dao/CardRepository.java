@@ -4,7 +4,9 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import io.github.mateusz00.entity.Card;
 
-public interface CardRepository extends MongoRepository<Card, String>
+public interface CardRepository extends MongoRepository<Card, String>, CustomCardRepository
 {
     void deleteAllByDeckId(String deckId);
+
+    long countByDeckId(String deckId);
 }

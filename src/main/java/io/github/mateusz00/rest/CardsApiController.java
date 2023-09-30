@@ -1,5 +1,6 @@
 package io.github.mateusz00.rest;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,6 +13,7 @@ import io.github.mateusz00.api.model.ScheduledCardReviews;
 import io.github.mateusz00.api.model.SubmittedCardReviewAnswer;
 import io.github.mateusz00.mapper.CardMapper;
 import io.github.mateusz00.service.UserProvider;
+import io.github.mateusz00.service.deck.CardPageQuery;
 import io.github.mateusz00.service.deck.DeckService;
 import lombok.RequiredArgsConstructor;
 
@@ -33,30 +35,47 @@ public class CardsApiController implements CardsApi
     @Override
     public ResponseEntity<Void> deleteCard(String deckId, String cardId)
     {
-        return null;
+        deckService.removeCard(deckId, userProvider.getUser(), cardId);
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     public ResponseEntity<Card> getCard(String deckId, String cardId)
     {
-        return null;
+        Card card = cardMapper.map(deckService.getCard(deckId, userProvider.getUser(), cardId));
+        return ResponseEntity.ok(card);
     }
 
     @Override
     public ResponseEntity<CardsPage> listCards(String deckId, Integer limit, Integer offset, String sortBy, String showOnly)
     {
-        return null;
+        var pageQuery = CardPageQuery.builder()
+                .pageNumber(offset)
+                .pageSize(limit)
+                .deckId(deckId)
+                .statusQuery(cardMapper.mapCardStatusQuery(showOnly))
+                .sort(cardMapper.mapCardSort(sortBy))
+                .shouldGetTotal(true)
+                .build();
+        Page<io.github.mateusz00.entity.Card> page = deckService.getCardsPage(userProvider.getUser(), pageQuery);
+        return ResponseEntity.ok(new CardsPage()
+                .currentPage(pageQuery.getPageNumber())
+                .limit(pageQuery.getPageSize())
+                .pageTotal(page.getTotalPages())
+                .total((int) page.getTotalElements())
+                .cards(cardMapper.mapCards(page.getContent())));
     }
 
     @Override
     public ResponseEntity<ScheduledCardReviews> submitAnswerForCard(String deckId, String cardId, SubmittedCardReviewAnswer submittedCardReviewAnswer)
     {
-        return null;
+        return null; // TODO
     }
 
     @Override
-    public ResponseEntity<Card> updateCard(String deckId, String cardId, CardUpdateRequest cardUpdateRequest)
+    public ResponseEntity<Card> patchCard(String deckId, String cardId, CardUpdateRequest cardUpdateRequest) // TODO Make sure it behaves like patch
     {
-        return null;
+        Card card = cardMapper.map(deckService.updateCard(deckId, userProvider.getUser(), cardId, cardUpdateRequest));
+        return ResponseEntity.ok(card);
     }
 }

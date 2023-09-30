@@ -48,7 +48,15 @@ public class SecurityConfig
         http.authorizeHttpRequests(config -> config
                 .requestMatchers("/login").anonymous()
                 .requestMatchers("/accounts").anonymous()
+                .requestMatchers("/accounts/password-resets").anonymous()
+                .requestMatchers("/accounts/password-resets/token").anonymous()
+                .requestMatchers("/settings").authenticated()
+                .requestMatchers("/settings/grammar").authenticated()
+                .requestMatchers("/resources").authenticated()
+                .requestMatchers("/exercises/**").authenticated()
+                .requestMatchers("/schedule/**").authenticated()
                 .requestMatchers("/decks/**").authenticated()
+                .requestMatchers("/shared/decks/**").authenticated()
                 .anyRequest().denyAll()
         );
 

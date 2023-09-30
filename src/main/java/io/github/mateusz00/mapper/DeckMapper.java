@@ -13,9 +13,9 @@ import io.github.mateusz00.entity.Deck;
 public interface DeckMapper
 {
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "userId", ignore = true)
     @Mapping(target = "effectiveSettings", ignore = true)
-    Deck map(DeckCreateRequest deckCreateRequest);
+    @Mapping(target = "customSettings", ignore = true)
+    Deck map(DeckCreateRequest deckCreateRequest, String userId);
 
     io.github.mateusz00.api.model.Deck map(Deck newDeck);
 

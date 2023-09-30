@@ -17,11 +17,10 @@ class DeckReviewStatisticsService
     public DeckReviewStatistics createStatistics(String deckId)
     {
         var date = LocalDate.now();
-        return deckReviewStatisticsRepository.insert(DeckReviewStatistics.builder()
-                .deckId(deckId)
-                .year(date.getYear())
-                .month(date.getMonthValue())
-                .build());
+        return deckReviewStatisticsRepository.insert(new DeckReviewStatistics()
+                .setDeckId(deckId)
+                .setYear(date.getYear())
+                .setMonth(date.getMonthValue()));
     }
 
     public void deleteStatistics(String deckId)

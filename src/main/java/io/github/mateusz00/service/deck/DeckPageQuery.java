@@ -6,7 +6,7 @@ import lombok.experimental.SuperBuilder;
 
 @Getter
 @SuperBuilder
-public class DeckQuery extends PageBaseQuery
+public class DeckPageQuery extends PageBaseQuery
 {
     private final String language;
 }

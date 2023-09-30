@@ -35,12 +35,12 @@ public class UserService {
             throw new BadRequestException("Email already used!");
 
         validate(accountRegistration);
-        var user = User.builder()
-                .username(accountRegistration.getUsername())
-                .password(passwordEncoder.encode(accountRegistration.getPassword()))
-                .email(accountRegistration.getEmail())
-                .roles(Set.of(UserRole.ROLE_USER))
-                .build();
+        var user = new User()
+                .setUsername(accountRegistration.getUsername())
+                .setPassword(passwordEncoder.encode(accountRegistration.getPassword()))
+                .setEmail(accountRegistration.getEmail())
+                .setRoles(Set.of(UserRole.ROLE_USER));
+        // TODO Create default User Settings
         return userRepository.save(user);
     }
     

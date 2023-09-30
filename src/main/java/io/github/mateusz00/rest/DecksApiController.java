@@ -11,7 +11,7 @@ import io.github.mateusz00.api.model.DeckUpdateRequest;
 import io.github.mateusz00.api.model.DecksPage;
 import io.github.mateusz00.mapper.DeckMapper;
 import io.github.mateusz00.service.UserProvider;
-import io.github.mateusz00.service.deck.DeckQuery;
+import io.github.mateusz00.service.deck.DeckPageQuery;
 import io.github.mateusz00.service.deck.DeckService;
 import lombok.RequiredArgsConstructor;
 
@@ -53,7 +53,7 @@ public class DecksApiController implements DecksApi
     @Override
     public ResponseEntity<DecksPage> listDecks(Integer limit, Integer offset, String language)
     {
-        DecksPage decksPage = deckService.getPage(userProvider.getUser(), DeckQuery.builder()
+        DecksPage decksPage = deckService.getPage(userProvider.getUser(), DeckPageQuery.builder()
                 .pageNumber(offset)
                 .pageSize(limit)
                 .language(language)

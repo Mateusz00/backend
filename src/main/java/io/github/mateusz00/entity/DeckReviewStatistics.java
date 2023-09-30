@@ -9,15 +9,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.lang.Nullable;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 @Document
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Accessors(chain = true)
 @CompoundIndex(
         name = "unique_deck_review_statistics",
         def = "{'deckId': 1, 'year': 1, 'month': 1}",
