@@ -28,6 +28,62 @@ paths:
               description: "JWT Bearer token, use it for subsequent requests"
         '400':
           description: Bad Request
+    get:
+      tags:
+        - Accounts
+      parameters:
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/pageOffsetQueryParam'
+        - $ref: '#/components/parameters/usernameQueryParam'
+        - $ref: '#/components/parameters/emailQueryParam'
+      summary: List accounts
+      operationId: listAccounts
+      description: "Returns page of accounts (ADMIN ONLY)"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountsPage'
+        '403':
+          description: Forbidden
+  /accounts/{accountId}:
+    parameters:
+      - $ref: '#/components/parameters/accountIdPathParam'
+    put:
+      tags:
+        - Accounts
+      summary: Update account
+      description: "Update users account (ADMIN ONLY)"
+      operationId: updateAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountUpdate'
+      responses:
+        '204':
+          description: No content
+        '400':
+          description: Bad Request
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      tags:
+        - Accounts
+      summary: Delete account
+      description: "Permanently delete users account (ADMIN ONLY)"
+      operationId: deleteAccount
+      responses:
+        "204":
+          description: No content
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /accounts/password-resets/token:
     post:
       tags:
@@ -1546,6 +1602,51 @@ components:
     ScheduledGrammarExerciseInstruction:
       type: string
       description: "Instruction in language preferred by user, if not available then default one is used"
+    AccountUpdate:
+      type: object
+      required:
+        - roles
+        - username
+        - email
+      properties:
+        roles:
+          $ref: '#/components/schemas/AccountRoles'
+        username:
+          $ref: '#/components/schemas/AccountUsername'
+        email:
+          $ref: '#/components/schemas/AccountEmail'
+    AccountRoles:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/AccountRole'
+    AccountRole:
+      type: string
+      enum:
+        - ROLE_USER
+        - ROLE_ADMIN
+    AccountsPage:
+      allOf:
+        - $ref: '#/components/schemas/PageBase'
+        - type: object
+          properties:
+            accounts:
+              type: array
+              items:
+                $ref: '#/components/schemas/AccountSearchResult'
+    AccountSearchResult:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/AccountId'
+        roles:
+          $ref: '#/components/schemas/AccountRoles'
+        username:
+          $ref: '#/components/schemas/AccountUsername'
+        email:
+          $ref: '#/components/schemas/AccountEmail'
+    AccountId:
+      type: string
 
   parameters:
     exerciseIdPathParam:
@@ -1710,3 +1811,22 @@ components:
       required: false
       schema:
         $ref: '#/components/schemas/DeckName'
+    accountIdPathParam:
+      name: accountId
+      in: path
+      description: 'Unique ID of the account'
+      required: true
+      schema:
+        $ref: '#/components/schemas/AccountId'
+    usernameQueryParam:
+      name: username
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/AccountUsername'
+    emailQueryParam:
+      name: email
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/AccountEmail'

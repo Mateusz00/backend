@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.github.mateusz00.api.AccountsApi;
 import io.github.mateusz00.api.model.AccountRegistration;
+import io.github.mateusz00.api.model.AccountUpdate;
+import io.github.mateusz00.api.model.AccountsPage;
 import io.github.mateusz00.api.model.PasswordResetRequest;
 import io.github.mateusz00.api.model.PasswordResetTokenRequest;
 import io.github.mateusz00.entity.User;
@@ -29,11 +31,29 @@ public class AccountsApiController implements AccountsApi
     }
 
     @Override
+    public ResponseEntity<Void> deleteAccount(String accountId)
+    {
+        return null; // TODO
+    }
+
+    @Override
+    public ResponseEntity<AccountsPage> listAccounts(Integer limit, Integer offset, String username, String email)
+    {
+        return null; // TODO
+    }
+
+    @Override
     public ResponseEntity<Void> registerNewAccount(AccountRegistration accountRegistration)
     {
         User user = userService.registerUser(accountRegistration);
         response.addHeader(HttpHeaders.AUTHORIZATION, tokenService.createToken(user.getUsername(), user.getId(), user.getEmail(), user.getRoles()));
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> updateAccount(String accountId, AccountUpdate accountUpdate)
+    {
+        return null; // TODO
     }
 
     @Override
