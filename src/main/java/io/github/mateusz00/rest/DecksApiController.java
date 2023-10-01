@@ -26,7 +26,7 @@ public class DecksApiController implements DecksApi
     @Override
     public ResponseEntity<Deck> createDeck(DeckCreateRequest deckCreateRequest)
     {
-        Deck deck = deckMapper.map(deckService.createDeck(deckCreateRequest, userProvider.getUser().userId()));
+        Deck deck = deckMapper.map(deckService.createDeck(deckCreateRequest, userProvider.getUser()));
         return ResponseEntity.ok(deck);
     }
 

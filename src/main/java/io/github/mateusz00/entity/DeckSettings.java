@@ -1,12 +1,12 @@
 package io.github.mateusz00.entity;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 @Data
+@Accessors(chain = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeckSettings
@@ -19,5 +19,5 @@ public class DeckSettings
     private float globalEaseModifier;
     private float intervalRateAfterFail;
     private int leechThreshold;
-    private List<Integer> newCardSteps; // plain int array?
+    private int[] newCardSteps;
 }

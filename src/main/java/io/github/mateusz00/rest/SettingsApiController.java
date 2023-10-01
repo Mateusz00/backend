@@ -11,8 +11,8 @@ import io.github.mateusz00.api.model.UserGrammarSettingsSearchResults;
 import io.github.mateusz00.api.model.UserGrammarSettingsUpsert;
 import io.github.mateusz00.api.model.UserSettings;
 import io.github.mateusz00.mapper.SettingsMapper;
-import io.github.mateusz00.service.SettingsService;
 import io.github.mateusz00.service.UserProvider;
+import io.github.mateusz00.service.settings.SettingsService;
 import lombok.RequiredArgsConstructor;
 
 @RestController

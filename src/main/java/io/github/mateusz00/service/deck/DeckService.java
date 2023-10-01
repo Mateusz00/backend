@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.IntFunction;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -23,15 +24,20 @@ import io.github.mateusz00.dao.DeckRepository;
 import io.github.mateusz00.dto.UserInfo;
 import io.github.mateusz00.entity.Card;
 import io.github.mateusz00.entity.Deck;
+import io.github.mateusz00.entity.DeckSettings;
 import io.github.mateusz00.entity.SharedCard;
 import io.github.mateusz00.entity.SharedDeck;
+import io.github.mateusz00.entity.UserSettings;
 import io.github.mateusz00.exception.AuthorizationException;
 import io.github.mateusz00.exception.BadRequestException;
 import io.github.mateusz00.exception.InternalException;
 import io.github.mateusz00.exception.NotFoundException;
 import io.github.mateusz00.mapper.DeckMapper;
+import io.github.mateusz00.mapper.SettingsMapper;
 import io.github.mateusz00.service.deck.shared.SharedCardPageQuery;
 import io.github.mateusz00.service.deck.shared.SharedDeckService;
+import io.github.mateusz00.service.settings.SettingsService;
+import io.github.mateusz00.service.settings.UserDeckSettingsUpdateEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -49,10 +55,20 @@ public class DeckService
     private final SharedDeckService sharedDeckService;
     private final DeckReviewStatisticsService statisticsService;
     private final DeckMapper deckMapper;
+    private final SettingsMapper settingsMapper;
+    private final SettingsService settingsService;
 
-    public Deck createDeck(DeckCreateRequest deckCreateRequest, String userId)
-    {// TODO effective settings
-        Deck deck = deckMapper.map(deckCreateRequest, userId);
+    @EventListener
+    void handleSettingsUpdateEvent(UserDeckSettingsUpdateEvent event)
+    {
+        List<Deck> decks = deckRepository.findAllByUserId(event.userId());
+        decks.forEach(deck -> deck.setEffectiveSettings(settingsMapper.mergeSettings(event.defaultSettings(), deck.getCustomSettings())));
+        deckRepository.saveAll(decks);
+    }
+
+    public Deck createDeck(DeckCreateRequest deckCreateRequest, UserInfo user)
+    {
+        Deck deck = deckMapper.map(deckCreateRequest, user.userId());
         var newDeckId = new ObjectId();
         deck.setId(newDeckId.toString());
 
@@ -66,13 +82,14 @@ public class DeckService
                     page -> cardService.createCards(page.getContent(), newDeckId.toString()));
         }
 
+        updateEffectiveSettings(user, deck);
         Deck savedDeck = deckRepository.insert(deck);
         statisticsService.createStatistics(deck.getId());
         return savedDeck;
     }
 
     @SneakyThrows
-    private <T> void processBatchAsyncAndJoin(long itemCount, int batchSize, Function<Integer, T> supplier, Consumer<T> action)
+    private <R> void processBatchAsyncAndJoin(long itemCount, int batchSize, IntFunction<R> supplier, Consumer<R> action)
     {
         try
         {
@@ -149,11 +166,22 @@ public class DeckService
     }
 
     public Deck updateDeck(String deckId, DeckUpdateRequest updateRequest, UserInfo user)
-    {        // TODO effective settings
-
+    {
         Deck deck = getDeck(deckId, user);
         deckMapper.update(deck, updateRequest);
+        updateEffectiveSettings(user, deck);
         return deckRepository.save(deck);
+    }
+
+    private void updateEffectiveSettings(UserInfo user, Deck deck)
+    {
+        if (deck.getCustomSettings() == null)
+        {
+            return;
+        }
+        UserSettings settings = settingsService.getUserSettings(user);
+        DeckSettings effectiveSettings = settingsMapper.mergeSettings(settings.getDefaultDecksSettings(), deck.getCustomSettings());
+        deck.setEffectiveSettings(effectiveSettings);
     }
 
     public Deck getDeck(String deckId, UserInfo user)

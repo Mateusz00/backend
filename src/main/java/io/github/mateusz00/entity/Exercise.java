@@ -19,7 +19,7 @@ public class Exercise
 {
     @Id
     private String id;
-    private String instruction;
+    private String instruction; // Used when no instructionsLanguage specified in settings or if translated instructions are not available
     private List<TranslatedInstruction> translatedInstructions;
     private String imgUrl;
     private List<Answer> answers;
