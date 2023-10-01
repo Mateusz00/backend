@@ -38,7 +38,7 @@ public class SettingsService
                         .setInstructionsLanguage(null))
                 .setDefaultDecksSettings(new DeckSettings()
                         .setNewCardsPerDay(10)
-                        .setEasyRate(1.3f)
+                        .setEasyRate(3.f)
                         .setHardRate(0.7f)
                         .setMaxInterval(365)
                         .setMinInterval(1)

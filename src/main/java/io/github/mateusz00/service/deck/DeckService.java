@@ -14,12 +14,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import io.github.mateusz00.api.model.CardCreateRequest;
+import io.github.mateusz00.api.model.CardReviewAnswer;
 import io.github.mateusz00.api.model.CardUpdateRequest;
 import io.github.mateusz00.api.model.DeckCreateRequest;
 import io.github.mateusz00.api.model.DeckSearchResult;
 import io.github.mateusz00.api.model.DeckUpdateRequest;
 import io.github.mateusz00.api.model.DecksPage;
+import io.github.mateusz00.api.model.ScheduledCardReviews;
 import io.github.mateusz00.api.model.SharedDeckCreateRequest;
+import io.github.mateusz00.api.model.SubmittedCardReviewAnswer;
 import io.github.mateusz00.dao.DeckRepository;
 import io.github.mateusz00.dto.UserInfo;
 import io.github.mateusz00.entity.Card;
@@ -165,6 +168,21 @@ public class DeckService
         return cardService.getPage(pageQuery);
     }
 
+    public ScheduledCardReviews submitAnswerForCard(String deckId, String cardId, SubmittedCardReviewAnswer submittedCardReviewAnswer, UserInfo user)
+    {
+        Deck deck = getDeck(deckId, user);
+        CardReviewAnswer answer = submittedCardReviewAnswer.getAnswer();
+        if (answer == null)
+        {
+            throw new BadRequestException("Missing answer!");
+        }
+
+        DeckSettings effectiveSettings = deck.getEffectiveSettings();
+        cardService.handleAnswer(deckId, cardId, answer, effectiveSettings);
+        statisticsService.updateStatisticsForAnswer(deckId, answer);
+        return null; // TODO
+    }
+
     public Deck updateDeck(String deckId, DeckUpdateRequest updateRequest, UserInfo user)
     {
         Deck deck = getDeck(deckId, user);
@@ -240,19 +258,19 @@ public class DeckService
     public Card updateCard(String deckId, UserInfo user, String cardId, CardUpdateRequest cardUpdateRequest)
     {
         ensureDeckExistsAndUserHasAccess(deckId, user);
-        return cardService.updateCard(cardId, cardUpdateRequest);
+        return cardService.updateCard(cardId, deckId, cardUpdateRequest);
     }
 
     public Card getCard(String deckId, UserInfo user, String cardId)
     {
         ensureDeckExistsAndUserHasAccess(deckId, user);
-        return cardService.getCard(cardId);
+        return cardService.getCard(cardId, deckId);
     }
 
     public void removeCard(String deckId, UserInfo user, String cardId)
     {
         ensureDeckExistsAndUserHasAccess(deckId, user);
-        cardService.removeCard(cardId);
+        cardService.removeCard(cardId, deckId);
     }
 
     private void ensureDeckExistsAndUserHasAccess(String deckId, UserInfo user)

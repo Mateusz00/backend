@@ -69,11 +69,12 @@ public class CardsApiController implements CardsApi
     @Override
     public ResponseEntity<ScheduledCardReviews> submitAnswerForCard(String deckId, String cardId, SubmittedCardReviewAnswer submittedCardReviewAnswer)
     {
+        deckService.submitAnswerForCard(deckId, cardId, submittedCardReviewAnswer, userProvider.getUser());
         return null; // TODO
     }
 
     @Override
-    public ResponseEntity<Card> patchCard(String deckId, String cardId, CardUpdateRequest cardUpdateRequest) // TODO Make sure it behaves like patch
+    public ResponseEntity<Card> patchCard(String deckId, String cardId, CardUpdateRequest cardUpdateRequest) // TODO Test
     {
         Card card = cardMapper.map(deckService.updateCard(deckId, userProvider.getUser(), cardId, cardUpdateRequest));
         return ResponseEntity.ok(card);

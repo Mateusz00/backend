@@ -4,3 +4,7 @@ services:
     image: mongo:7.0
     ports:
       - "27017:27017"
+  localS3:
+    image: luofuxiang/local-s3:native-1.12.1
+    ports:
+      - "8081:80"

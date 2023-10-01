@@ -7,12 +7,15 @@ import io.github.mateusz00.api.ScheduleApi;
 import io.github.mateusz00.api.model.ScheduledCardReviews;
 import io.github.mateusz00.api.model.ScheduledGrammarExercise;
 import io.github.mateusz00.api.model.ScheduledGrammarExercises;
+import io.github.mateusz00.service.deck.DeckService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
 public class ScheduleApiController implements ScheduleApi
 {
+    private final DeckService deckService;
+
     @Override
     public ResponseEntity<ScheduledCardReviews> getScheduledCards(String deckId)
     {

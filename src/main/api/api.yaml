@@ -51,11 +51,11 @@ paths:
   /accounts/{accountId}:
     parameters:
       - $ref: '#/components/parameters/accountIdPathParam'
-    put:
+    patch:
       tags:
         - Accounts
       summary: Update account
-      description: "Update users account (ADMIN ONLY)"
+      description: "Update users account (Roles will be updated only if request was done by admin)"
       operationId: updateAccount
       requestBody:
         content:
@@ -1139,7 +1139,7 @@ components:
       type: integer
       format: int32
       minimum: 1
-      description: "The minimum interval (in days) that can be used in determining the date of the next review"
+      description: "The minimum interval (in days) that can be used in determining the date of the next review (applies only to non-new cards)"
     GlobalEaseModifierSetting:
       type: number
       format: float
@@ -1342,7 +1342,7 @@ components:
       type: string
       description: "Cards go from REVIEWED_YOUNG to REVIEWED_OLD after the interval is bigger than 30 days"
       enum:
-        - NOT_SEEN
+        - NEW
         - REVIEWED_YOUNG
         - REVIEWED_OLD
     CardNextReview:
@@ -1604,15 +1604,9 @@ components:
       description: "Instruction in language preferred by user, if not available then default one is used"
     AccountUpdate:
       type: object
-      required:
-        - roles
-        - username
-        - email
       properties:
         roles:
           $ref: '#/components/schemas/AccountRoles'
-        username:
-          $ref: '#/components/schemas/AccountUsername'
         email:
           $ref: '#/components/schemas/AccountEmail'
     AccountRoles:
@@ -1760,7 +1754,7 @@ components:
         enum:
           - LEECH
           - SUSPENDED
-          - NOT_SEEN
+          - NEW
           - REVIEWED_YOUNG
           - REVIEWED_OLD
     statisticsIntervalQueryParam:

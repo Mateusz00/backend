@@ -32,13 +32,13 @@ public class Card
     private List<CardContent> front;
     private List<CardContent> back;
     @NonNull
-    private CardStatus status = CardStatus.NOT_SEEN;
+    private CardStatus status = CardStatus.NEW;
     @Indexed
     private Instant nextReview;
     private float easeRate = 1.f;
     private int interval = 0;
     private boolean suspended = false;
-    private Integer currentStep;
+    private int currentStep = 0;
     @NonNull
     private CardStatistics statistics = new CardStatistics();
     private boolean leech = false;

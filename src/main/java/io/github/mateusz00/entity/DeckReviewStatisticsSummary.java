@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DeckReviewStatisticsSummary
 {
-    private int hard;
-    private int normal;
-    private int easy;
-    private int wrong;
-    private int suspended;
+    private int hard = 0;
+    private int normal = 0;
+    private int easy = 0;
+    private int wrong = 0;
+    private int suspended = 0;
 }
