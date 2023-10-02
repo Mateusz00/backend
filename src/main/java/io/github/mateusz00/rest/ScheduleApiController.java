@@ -7,6 +7,7 @@ import io.github.mateusz00.api.ScheduleApi;
 import io.github.mateusz00.api.model.ScheduledCardReviews;
 import io.github.mateusz00.api.model.ScheduledGrammarExercise;
 import io.github.mateusz00.api.model.ScheduledGrammarExercises;
+import io.github.mateusz00.service.UserProvider;
 import io.github.mateusz00.service.deck.DeckService;
 import lombok.RequiredArgsConstructor;
 
@@ -15,11 +16,12 @@ import lombok.RequiredArgsConstructor;
 public class ScheduleApiController implements ScheduleApi
 {
     private final DeckService deckService;
+    private final UserProvider userProvider;
 
     @Override
     public ResponseEntity<ScheduledCardReviews> getScheduledCards(String deckId)
     {
-        return null; // TODO
+        return ResponseEntity.ok(deckService.getScheduledCards(deckId, userProvider.getUser()));
     }
 
     @Override

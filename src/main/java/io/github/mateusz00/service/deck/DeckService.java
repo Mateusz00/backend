@@ -1,5 +1,8 @@
 package io.github.mateusz00.service.deck;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -26,6 +29,7 @@ import io.github.mateusz00.api.model.SubmittedCardReviewAnswer;
 import io.github.mateusz00.dao.DeckRepository;
 import io.github.mateusz00.dto.UserInfo;
 import io.github.mateusz00.entity.Card;
+import io.github.mateusz00.entity.CardCounter;
 import io.github.mateusz00.entity.Deck;
 import io.github.mateusz00.entity.DeckSettings;
 import io.github.mateusz00.entity.SharedCard;
@@ -35,8 +39,10 @@ import io.github.mateusz00.exception.AuthorizationException;
 import io.github.mateusz00.exception.BadRequestException;
 import io.github.mateusz00.exception.InternalException;
 import io.github.mateusz00.exception.NotFoundException;
+import io.github.mateusz00.mapper.CardMapper;
 import io.github.mateusz00.mapper.DeckMapper;
 import io.github.mateusz00.mapper.SettingsMapper;
+import io.github.mateusz00.service.UtcDateTimeProvider;
 import io.github.mateusz00.service.deck.shared.SharedCardPageQuery;
 import io.github.mateusz00.service.deck.shared.SharedDeckService;
 import io.github.mateusz00.service.settings.SettingsService;
@@ -58,8 +64,10 @@ public class DeckService
     private final SharedDeckService sharedDeckService;
     private final DeckReviewStatisticsService statisticsService;
     private final DeckMapper deckMapper;
+    private final CardMapper cardMapper;
     private final SettingsMapper settingsMapper;
     private final SettingsService settingsService;
+    private final UtcDateTimeProvider dateTimeProvider;
 
     @EventListener
     void handleSettingsUpdateEvent(UserDeckSettingsUpdateEvent event)
@@ -138,7 +146,6 @@ public class DeckService
         return cards;
     }
 
-    // TODO E2E tests in Java, 1 test.properties with link etc with prod commented out
     public SharedDeck shareDeck(UserInfo user, SharedDeckCreateRequest sharedDeckCreateRequest)
     {
         String deckId = sharedDeckCreateRequest.getDeckId();
@@ -183,20 +190,46 @@ public class DeckService
         return null; // TODO
     }
 
+    public ScheduledCardReviews getScheduledCards(String deckId, UserInfo user)
+    {
+        Deck deck = getDeck(deckId, user);
+        CardCounter cardCounter = deck.getNewCardsSeen();
+        LocalDateTime currentDateTimeDays = dateTimeProvider.now().truncatedTo(ChronoUnit.DAYS);
+
+        LocalDateTime lastNewCardsSeenDate = dateTimeProvider.convert(cardCounter.getDate()).truncatedTo(ChronoUnit.DAYS);
+        if (!currentDateTimeDays.isEqual(lastNewCardsSeenDate))
+        {
+            cardCounter.setDate(Instant.now());
+            cardCounter.setCount(0);
+        }
+
+        int newCards = deck.getEffectiveSettings().getNewCardsPerDay() - cardCounter.getCount();
+        ScheduledCardReviews cardReviews = cardService.getCardToReview(ScheduledCardQuery.builder()
+                .deckId(deckId)
+                .date(currentDateTimeDays)
+                .newCards(newCards)
+                .build());
+        Card cardToReview = cardMapper.mapForReview(cardReviews.getCardToReview());
+        if (cardToReview != null)
+        {
+            cardService.predictNextReview(cardToReview, CardReviewAnswer.EASY, deck.getEffectiveSettings()); // TODO
+        }
+        return null;
+    }
+
     public Deck updateDeck(String deckId, DeckUpdateRequest updateRequest, UserInfo user)
     {
         Deck deck = getDeck(deckId, user);
         deckMapper.update(deck, updateRequest);
-        updateEffectiveSettings(user, deck);
+        if (deck.getCustomSettings() != null)
+        {
+            updateEffectiveSettings(user, deck);
+        }
         return deckRepository.save(deck);
     }
 
     private void updateEffectiveSettings(UserInfo user, Deck deck)
     {
-        if (deck.getCustomSettings() == null)
-        {
-            return;
-        }
         UserSettings settings = settingsService.getUserSettings(user);
         DeckSettings effectiveSettings = settingsMapper.mergeSettings(settings.getDefaultDecksSettings(), deck.getCustomSettings());
         deck.setEffectiveSettings(effectiveSettings);

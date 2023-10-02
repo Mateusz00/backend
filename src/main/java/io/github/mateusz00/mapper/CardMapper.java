@@ -10,6 +10,7 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ValueMapping;
+import org.mapstruct.control.DeepClone;
 
 import io.github.mateusz00.api.model.Card;
 import io.github.mateusz00.api.model.CardCreateRequest;
@@ -23,6 +24,11 @@ import io.github.mateusz00.service.deck.CardStatusQuery;
 public interface CardMapper
 {
     Card map(io.github.mateusz00.entity.Card card);
+
+    @BeanMapping(mappingControl = DeepClone.class)
+    @Mapping(target = "front", ignore = true)
+    @Mapping(target = "back", ignore = true)
+    io.github.mateusz00.entity.Card deepClone(io.github.mateusz00.entity.Card card);
 
     List<Card> mapCards(List<io.github.mateusz00.entity.Card> card);
 
@@ -66,4 +72,7 @@ public interface CardMapper
     @Mapping(target = "statistics", ignore = true)
     @Mapping(target = "leech", ignore = true)
     io.github.mateusz00.entity.Card map(SharedCard card, String deckId);
+
+    @Mapping(target = "deckId", ignore = true)
+    io.github.mateusz00.entity.Card mapForReview(Card card);
 }

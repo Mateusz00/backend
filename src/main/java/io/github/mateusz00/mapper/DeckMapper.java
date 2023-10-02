@@ -15,6 +15,7 @@ public interface DeckMapper
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "effectiveSettings", ignore = true)
     @Mapping(target = "customSettings", ignore = true)
+    @Mapping(target = "newCardsSeen", ignore = true)
     Deck map(DeckCreateRequest deckCreateRequest, String userId);
 
     io.github.mateusz00.api.model.Deck map(Deck newDeck);
@@ -26,5 +27,6 @@ public interface DeckMapper
     @Mapping(target = "sharedDeckId", ignore = true)
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "effectiveSettings", ignore = true)
-    void update(@MappingTarget Deck deck, DeckUpdateRequest deckUpdateRequest); // TODO update effective too
+    @Mapping(target = "newCardsSeen", ignore = true)
+    void update(@MappingTarget Deck deck, DeckUpdateRequest deckUpdateRequest);
 }

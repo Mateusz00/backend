@@ -10,7 +10,7 @@ import io.github.mateusz00.dao.DeckReviewStatisticsRepository;
 import io.github.mateusz00.entity.DeckReviewStatistics;
 import io.github.mateusz00.entity.DeckReviewStatisticsEntry;
 import io.github.mateusz00.entity.DeckReviewStatisticsSummary;
-import io.github.mateusz00.service.LocalDateTimeProvider;
+import io.github.mateusz00.service.UtcDateTimeProvider;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -18,11 +18,11 @@ import lombok.RequiredArgsConstructor;
 class DeckReviewStatisticsService
 {
     private final DeckReviewStatisticsRepository deckReviewStatisticsRepository;
-    private final LocalDateTimeProvider localDateTimeProvider;
+    private final UtcDateTimeProvider utcDateTimeProvider;
 
     public DeckReviewStatistics createStatistics(String deckId)
     {
-        var date = localDateTimeProvider.now();
+        var date = utcDateTimeProvider.now();
         return deckReviewStatisticsRepository.insert(new DeckReviewStatistics()
                 .setDeckId(deckId)
                 .setYear(date.getYear())
@@ -45,7 +45,7 @@ class DeckReviewStatisticsService
      */
     void updateStatisticsForAnswer(String deckId, CardReviewAnswer answer) // TODO IT test
     {
-        var date = localDateTimeProvider.now();
+        var date = utcDateTimeProvider.now();
         DeckReviewStatistics deckStatistics = getOrCreateStatisticsForDate(deckId, date);
         Optional<DeckReviewStatisticsEntry> oDaySummary = deckStatistics.getReviews()
                 .stream()

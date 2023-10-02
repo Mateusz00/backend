@@ -2,8 +2,9 @@ package io.github.mateusz00.service.deck;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import io.github.mateusz00.api.model.CardCreateRequest;
 import io.github.mateusz00.api.model.CardReviewAnswer;
 import io.github.mateusz00.api.model.CardUpdateRequest;
+import io.github.mateusz00.api.model.ScheduledCardReviews;
 import io.github.mateusz00.dao.CardRepository;
 import io.github.mateusz00.entity.Card;
 import io.github.mateusz00.entity.CardStatistics;
@@ -21,7 +23,7 @@ import io.github.mateusz00.entity.SharedCard;
 import io.github.mateusz00.exception.InternalException;
 import io.github.mateusz00.exception.NotFoundException;
 import io.github.mateusz00.mapper.CardMapper;
-import io.github.mateusz00.service.LocalDateTimeProvider;
+import io.github.mateusz00.service.UtcDateTimeProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,9 +39,10 @@ class CardService
     public static final float HARD_EASE_RATE_STEP = -0.02f;
     public static final float EASY_EASE_RATE_STEP = Math.abs(FAIL_EASE_RATE_STEP);
     public static final float MAX_EASE_RATE = 1.5f;
+    public static final int NEW_CARD_REVIEW_FREQUENCY = 15;
     private final CardRepository cardRepository;
     private final CardMapper cardMapper;
-    private final LocalDateTimeProvider localDateTimeProvider;
+    private final UtcDateTimeProvider dateTimeProvider;
 
     void handleAnswer(String deckId, String cardId, CardReviewAnswer answer, DeckSettings effectiveSettings)
     {
@@ -63,12 +66,19 @@ class CardService
         }
     }
 
+    LocalDateTime predictNextReview(Card card, CardReviewAnswer answer, DeckSettings effectiveSettings)
+    {
+        Card cardCopy = cardMapper.deepClone(card);
+        calculateNextReview(cardCopy, answer, effectiveSettings);
+        return dateTimeProvider.convert(cardCopy.getNextReview());
+    }
+
     private void calculateNextReview(Card card, CardReviewAnswer answer, DeckSettings effectiveSettings)
     {
-        var now = localDateTimeProvider.now();
+        var now = dateTimeProvider.now();
         if (answer == CardReviewAnswer.SUSPEND)
         {
-            card.setNextReview(toInstant(now.plusDays(1)));
+            card.setNextReview(dateTimeProvider.toInstant(now.plusDays(1)));
             card.setCurrentStep(0);
             return;
         }
@@ -82,7 +92,7 @@ class CardService
             {
                 newReviewDate = newReviewDate.plusMinutes(20);
             }
-            card.setNextReview(toInstant(newReviewDate));
+            card.setNextReview(dateTimeProvider.toInstant(newReviewDate));
             card.setCurrentStep(0);
             return;
         }
@@ -97,12 +107,12 @@ class CardService
     {
         if (card.getInterval() > 0)
         {
-            return toInstant(date.plusDays(card.getInterval()));
+            return dateTimeProvider.toInstant(date.plusDays(card.getInterval()));
         }
         else
         {
             int minutes = effectiveSettings.getNewCardSteps()[card.getCurrentStep() - 1];
-            return toInstant(date.plusMinutes(minutes));
+            return dateTimeProvider.toInstant(date.plusMinutes(minutes));
         }
     }
 
@@ -181,11 +191,6 @@ class CardService
                 };
     }
 
-    private Instant toInstant(LocalDateTime dateTime)
-    {
-        return dateTime.atZone(ZoneId.systemDefault()).toInstant();
-    }
-
     private void updateCardStatus(Card card, DeckSettings effectiveSettings)
     {
         if (card.getInterval() > REVIEWED_OLD_THRESHOLD)
@@ -206,6 +211,54 @@ class CardService
             statistics.setFails(statistics.getFails() + 1);
         }
         statistics.setReviews(statistics.getReviews() + 1);
+    }
+
+    ScheduledCardCount getScheduledCardCount(ScheduledCardQuery query)
+    {
+        long newCards = getNewCardsToReview(query);
+        var currentDateTimeDays = dateTimeProvider.toInstant(query.getDate().truncatedTo(ChronoUnit.DAYS));
+        long scheduledCards = cardRepository.countByDeckIdAndNextReviewLessThanEqual(query.getDeckId(), currentDateTimeDays);
+        return new ScheduledCardCount((int) newCards, (int) scheduledCards);
+    }
+
+    ScheduledCardReviews getCardToReview(ScheduledCardQuery query)
+    {
+        ScheduledCardCount scheduledCardCount = getScheduledCardCount(query);
+        var currentDateTimeDays = dateTimeProvider.toInstant(query.getDate().truncatedTo(ChronoUnit.DAYS));
+        Optional<Card> cardToReview = getCardToReview(query, scheduledCardCount.newCards(), currentDateTimeDays, scheduledCardCount.cardsToReview());
+        if (cardToReview.isEmpty())
+        {
+            return new ScheduledCardReviews()
+                    .cardToReview(null)
+                    .total(0);
+        }
+        return new ScheduledCardReviews()
+                .cardToReview(cardMapper.map(cardToReview.get()))
+                .total(scheduledCardCount.getTotal());
+    }
+
+    private long getNewCardsToReview(ScheduledCardQuery query)
+    {
+        if (query.getNewCards() > 0)
+        {
+            long newCardsInDeck = cardRepository.countByDeckIdAndStatus(query.getDeckId(), CardStatus.NEW.name());
+            return Math.min(newCardsInDeck, query.getNewCards());
+        }
+        return 0;
+    }
+
+    private Optional<Card> getCardToReview(ScheduledCardQuery query, long newCards, Instant currentDateTimeDays, long scheduledCards)
+    {
+        if (newCards > scheduledCards / NEW_CARD_REVIEW_FREQUENCY)
+        {
+            var card = cardRepository.findByDeckIdAndStatus(query.getDeckId(), CardStatus.NEW.name());
+            if (card.isEmpty())
+            {
+                return cardRepository.findByDeckIdAndNextReviewLessThanEqual(query.getDeckId(), currentDateTimeDays);
+            }
+            return card;
+        }
+        return cardRepository.findByDeckIdAndNextReviewLessThanEqual(query.getDeckId(), currentDateTimeDays);
     }
 
     public void deleteAllCards(String deckId)

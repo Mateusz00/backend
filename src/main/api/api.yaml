@@ -1434,12 +1434,16 @@ components:
       properties:
         total:
           $ref: '#/components/schemas/ItemsTotal'
-        cards:
-          type: array
-          items:
-            $ref: '#/components/schemas/CardId'
         cardToReview:
           $ref: '#/components/schemas/Card'
+        wrongAnswerIntervalPrediction:
+          $ref: '#/components/schemas/AnswerIntervalPrediction'
+        hardAnswerIntervalPrediction:
+          $ref: '#/components/schemas/AnswerIntervalPrediction'
+        goodAnswerIntervalPrediction:
+          $ref: '#/components/schemas/AnswerIntervalPrediction'
+        easyAnswerIntervalPrediction:
+          $ref: '#/components/schemas/AnswerIntervalPrediction'
     DeckWaitingReviews:
       type: integer
       format: int32
@@ -1641,6 +1645,23 @@ components:
           $ref: '#/components/schemas/AccountEmail'
     AccountId:
       type: string
+    AnswerIntervalPrediction:
+      type: object
+      properties:
+        value:
+          $ref: '#/components/schemas/AnswerIntervalPredictionValue'
+        unit:
+          $ref: '#/components/schemas/AnswerIntervalPredictionUnit'
+    AnswerIntervalPredictionValue:
+      type: number
+      format: int32
+      example: 30
+    AnswerIntervalPredictionUnit:
+      type: string
+      enum:
+        - MINUTES
+        - DAYS
+        - MONTHS
 
   parameters:
     exerciseIdPathParam:

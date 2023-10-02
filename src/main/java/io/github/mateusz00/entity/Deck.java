@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Document
 @Data
@@ -25,4 +26,6 @@ public class Deck
     private String language;
     private CustomDeckSettings customSettings;
     private DeckSettings effectiveSettings;
+    @NonNull
+    private CardCounter newCardsSeen = new CardCounter();
 }
