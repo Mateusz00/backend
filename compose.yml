@@ -12,6 +12,7 @@ services:
   app:
     environment:
       - SPRING_DATA_MONGODB_HOST=mongodb
+      - LOCAL_S3=localS3
     image: mateuszsek/backend:latest
     ports:
       - "8080:8080"
