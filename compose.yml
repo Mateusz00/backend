@@ -8,3 +8,13 @@ services:
     image: luofuxiang/local-s3:native-1.12.1
     ports:
       - "8081:80"
+
+  app:
+    environment:
+      - SPRING_DATA_MONGODB_HOST=mongodb
+    image: mateuszsek/backend:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+      - localS3

@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 class CardService
 {
     public static final int REVIEWED_OLD_THRESHOLD = 30;
-    public static final float NORMAL_RATE = 1.5f;
+    public static final float NORMAL_RATE = 1.8f;
     public static final float MIN_EASE_RATE = 0.8f;
     public static final float FAIL_EASE_RATE_STEP = -0.04f;
     public static final float HARD_EASE_RATE_STEP = -0.02f;
@@ -44,9 +44,8 @@ class CardService
     private final CardMapper cardMapper;
     private final UtcDateTimeProvider dateTimeProvider;
 
-    void handleAnswer(String deckId, String cardId, CardReviewAnswer answer, DeckSettings effectiveSettings)
+    void handleAnswer(String deckId, Card card, CardReviewAnswer answer, DeckSettings effectiveSettings)
     {
-        Card card = getCard(cardId, deckId);
         updateStatisticsForAnswer(card, answer);
         updateFlags(card, answer, effectiveSettings);
         calculateNextReview(card, answer, effectiveSettings);
@@ -68,7 +67,7 @@ class CardService
 
     LocalDateTime predictNextReview(Card card, CardReviewAnswer answer, DeckSettings effectiveSettings)
     {
-        Card cardCopy = cardMapper.deepClone(card);
+        Card cardCopy = cardMapper.deepCloneSlim(card);
         calculateNextReview(cardCopy, answer, effectiveSettings);
         return dateTimeProvider.convert(cardCopy.getNextReview());
     }
@@ -84,7 +83,7 @@ class CardService
         }
         else if (answer == CardReviewAnswer.WRONG)
         {
-            int newInterval = calculateNewInterval(effectiveSettings.getIntervalRateAfterFail(), card.getInterval(), effectiveSettings);
+            int newInterval = calculateNewInterval(effectiveSettings.getIntervalRateAfterFail(), card.getInterval(), effectiveSettings.getMaxInterval());
             card.setInterval(newInterval);
             card.setEaseRate(getNewEaseRate(card, FAIL_EASE_RATE_STEP));
             LocalDateTime newReviewDate = now.plusDays(newInterval);
@@ -112,7 +111,13 @@ class CardService
         else
         {
             int minutes = effectiveSettings.getNewCardSteps()[card.getCurrentStep() - 1];
-            return dateTimeProvider.toInstant(date.plusMinutes(minutes));
+            LocalDateTime newDate = date.plusMinutes(minutes);
+            if (dateTimeProvider.now().getDayOfMonth() != newDate.getDayOfMonth())
+            {
+                // Make sure that user will be able to complete all steps on the same day in one session
+                newDate = newDate.truncatedTo(ChronoUnit.DAYS).minusSeconds(1);
+            }
+            return dateTimeProvider.toInstant(newDate);
         }
     }
 
@@ -126,7 +131,7 @@ class CardService
     // TODO unit test
     private int getNewStep(Card card, DeckSettings effectiveSettings, CardReviewAnswer answer)
     {
-        if (card.getInterval() > 0 || card.getStatus() != CardStatus.NEW)
+        if (card.getInterval() > 0 || card.getStatus() != CardStatus.NEW || card.getStatus() == CardStatus.NEW_IN_REVIEW)
         {
             return 0;
         }
@@ -137,28 +142,29 @@ class CardService
         }
         return Math.min(card.getCurrentStep() + 1, maxSteps + 1);
     }
-// TODO Precalculate nextReview to display in UI? json={value:30, units: "min"} do not extract methods just call calculateNextReview(extra date field)
+
     private int calculateNewInterval(Card card, DeckSettings effectiveSettings, CardReviewAnswer answer)
     {
-        if (card.getStatus() == CardStatus.NEW && card.getCurrentStep() < effectiveSettings.getNewCardSteps().length + 1)
+        if ((card.getStatus() == CardStatus.NEW || card.getStatus() == CardStatus.NEW_IN_REVIEW) &&
+                card.getCurrentStep() < effectiveSettings.getNewCardSteps().length + 1)
         {
             return 0;
         }
         float easeModifier = effectiveSettings.getGlobalEaseModifier() * card.getEaseRate();
         float answerModifier = getAnswerModifier(card.getId(), answer, effectiveSettings);
-        int newInterval = calculateNewInterval(easeModifier * answerModifier, card.getInterval(), effectiveSettings);
-        int intervalDiff = Math.abs(newInterval - card.getInterval());
-        if (intervalDiff == 0)
+        int newInterval = calculateNewInterval(easeModifier * answerModifier, card.getInterval(), effectiveSettings.getMaxInterval());
+        int intervalDiff = newInterval - card.getInterval();
+        if (intervalDiff >= 0 && intervalDiff < effectiveSettings.getMinIntervalIncrease())
         {
-            newInterval += 1;
+            newInterval = card.getInterval() + effectiveSettings.getMinIntervalIncrease();
         }
         return newInterval;
     }
 
-    private int calculateNewInterval(float rate, int currentInterval, DeckSettings effectiveSettings)
+    private int calculateNewInterval(float rate, int currentInterval, int maxInterval)
     {
-        int newInterval = Math.max((int) (rate * currentInterval), effectiveSettings.getMinInterval());
-        return Math.min(newInterval, effectiveSettings.getMaxInterval());
+        int newInterval = Math.max((int) (rate * currentInterval), 1);
+        return Math.min(newInterval, maxInterval);
     }
 
     private float getAnswerEaseRateStep(CardReviewAnswer answer, String cardId)
@@ -201,6 +207,10 @@ class CardService
         {
             card.setStatus(CardStatus.REVIEWED_YOUNG);
         }
+        else if (card.getStatus() == CardStatus.NEW)
+        {
+            card.setStatus(CardStatus.NEW_IN_REVIEW);
+        }
     }
 
     private void updateStatisticsForAnswer(Card card, CardReviewAnswer answer)
@@ -213,19 +223,21 @@ class CardService
         statistics.setReviews(statistics.getReviews() + 1);
     }
 
-    ScheduledCardCount getScheduledCardCount(ScheduledCardQuery query)
+    ScheduledCardCount getScheduledCardCount(ScheduledCardQuery query, Instant dateQuery)
     {
         long newCards = getNewCardsToReview(query);
-        var currentDateTimeDays = dateTimeProvider.toInstant(query.getDate().truncatedTo(ChronoUnit.DAYS));
-        long scheduledCards = cardRepository.countByDeckIdAndNextReviewLessThanEqual(query.getDeckId(), currentDateTimeDays);
+        long scheduledCards = cardRepository.countByDeckIdAndNextReviewLessThanEqual(query.getDeckId(), dateQuery);
         return new ScheduledCardCount((int) newCards, (int) scheduledCards);
     }
 
     ScheduledCardReviews getCardToReview(ScheduledCardQuery query)
     {
-        ScheduledCardCount scheduledCardCount = getScheduledCardCount(query);
-        var currentDateTimeDays = dateTimeProvider.toInstant(query.getDate().truncatedTo(ChronoUnit.DAYS));
-        Optional<Card> cardToReview = getCardToReview(query, scheduledCardCount.newCards(), currentDateTimeDays, scheduledCardCount.cardsToReview());
+        var date = dateTimeProvider.toInstant(query.getDate()
+                .truncatedTo(ChronoUnit.DAYS)
+                .plusDays(1)
+                .minusSeconds(1)); // All cards scheduled for today
+        ScheduledCardCount scheduledCardCount = getScheduledCardCount(query, date);
+        Optional<Card> cardToReview = getCardToReview(query, scheduledCardCount.newCards(), scheduledCardCount.cardsToReview(), date);
         if (cardToReview.isEmpty())
         {
             return new ScheduledCardReviews()
@@ -247,18 +259,18 @@ class CardService
         return 0;
     }
 
-    private Optional<Card> getCardToReview(ScheduledCardQuery query, long newCards, Instant currentDateTimeDays, long scheduledCards)
+    private Optional<Card> getCardToReview(ScheduledCardQuery query, long newCards, long scheduledCards, Instant dateQuery)
     {
         if (newCards > scheduledCards / NEW_CARD_REVIEW_FREQUENCY)
         {
             var card = cardRepository.findByDeckIdAndStatus(query.getDeckId(), CardStatus.NEW.name());
             if (card.isEmpty())
             {
-                return cardRepository.findByDeckIdAndNextReviewLessThanEqual(query.getDeckId(), currentDateTimeDays);
+                return cardRepository.findByDeckIdAndNextReviewLessThanEqualOrderByNextReviewAsc(query.getDeckId(), dateQuery);
             }
             return card;
         }
-        return cardRepository.findByDeckIdAndNextReviewLessThanEqual(query.getDeckId(), currentDateTimeDays);
+        return cardRepository.findByDeckIdAndNextReviewLessThanEqualOrderByNextReviewAsc(query.getDeckId(), dateQuery);
     }
 
     public void deleteAllCards(String deckId)

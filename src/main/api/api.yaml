@@ -1061,7 +1061,7 @@ components:
             - easyRate
             - hardRate
             - maxInterval
-            - minInterval
+            - minIntervalIncrease
             - globalEaseModifier
             - intervalRateAfterFail
             - leechThreshold
@@ -1077,8 +1077,8 @@ components:
           $ref: '#/components/schemas/HardRateSetting'
         maxInterval:
           $ref: '#/components/schemas/MaxIntervalSetting'
-        minInterval:
-          $ref: '#/components/schemas/MinIntervalSetting'
+        minIntervalIncrease:
+          $ref: '#/components/schemas/MinIntervalSettingIncrease'
         globalEaseModifier:
           $ref: '#/components/schemas/GlobalEaseModifierSetting'
         intervalRateAfterFail:
@@ -1135,11 +1135,11 @@ components:
       exclusiveMinimum: true
       maximum: 1
       description: "The multiplier for the 'hard' answer, used during calculation of the next review date"
-    MinIntervalSetting:
+    MinIntervalSettingIncrease:
       type: integer
       format: int32
       minimum: 1
-      description: "The minimum interval (in days) that can be used in determining the date of the next review (applies only to non-new cards)"
+      description: "The minimum interval increase (in days) used in determining the date of the next review (applies only to non-new cards and correct answers)"
     GlobalEaseModifierSetting:
       type: number
       format: float
@@ -1343,6 +1343,7 @@ components:
       description: "Cards go from REVIEWED_YOUNG to REVIEWED_OLD after the interval is bigger than 30 days"
       enum:
         - NEW
+        - NEW_IN_REVIEW
         - REVIEWED_YOUNG
         - REVIEWED_OLD
     CardNextReview:
@@ -1653,15 +1654,15 @@ components:
         unit:
           $ref: '#/components/schemas/AnswerIntervalPredictionUnit'
     AnswerIntervalPredictionValue:
-      type: number
+      type: integer
       format: int32
       example: 30
     AnswerIntervalPredictionUnit:
       type: string
       enum:
         - MINUTES
+        - HOURS
         - DAYS
-        - MONTHS
 
   parameters:
     exerciseIdPathParam:

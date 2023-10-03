@@ -28,7 +28,7 @@ public interface CardMapper
     @BeanMapping(mappingControl = DeepClone.class)
     @Mapping(target = "front", ignore = true)
     @Mapping(target = "back", ignore = true)
-    io.github.mateusz00.entity.Card deepClone(io.github.mateusz00.entity.Card card);
+    io.github.mateusz00.entity.Card deepCloneSlim(io.github.mateusz00.entity.Card card);
 
     List<Card> mapCards(List<io.github.mateusz00.entity.Card> card);
 

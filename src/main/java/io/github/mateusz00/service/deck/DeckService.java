@@ -1,5 +1,6 @@
 package io.github.mateusz00.service.deck;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -16,6 +17,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import io.github.mateusz00.api.model.AnswerIntervalPrediction;
+import io.github.mateusz00.api.model.AnswerIntervalPredictionUnit;
 import io.github.mateusz00.api.model.CardCreateRequest;
 import io.github.mateusz00.api.model.CardReviewAnswer;
 import io.github.mateusz00.api.model.CardUpdateRequest;
@@ -30,6 +33,7 @@ import io.github.mateusz00.dao.DeckRepository;
 import io.github.mateusz00.dto.UserInfo;
 import io.github.mateusz00.entity.Card;
 import io.github.mateusz00.entity.CardCounter;
+import io.github.mateusz00.entity.CardStatus;
 import io.github.mateusz00.entity.Deck;
 import io.github.mateusz00.entity.DeckSettings;
 import io.github.mateusz00.entity.SharedCard;
@@ -185,36 +189,88 @@ public class DeckService
         }
 
         DeckSettings effectiveSettings = deck.getEffectiveSettings();
-        cardService.handleAnswer(deckId, cardId, answer, effectiveSettings);
+        Card card = cardService.getCard(cardId, deckId);
+        if (card.getStatus() == CardStatus.NEW && answer != CardReviewAnswer.SUSPEND)
+        {
+            restartNewCardsSeenCounterIfNecessary(deck);
+            deck.getNewCardsSeen().incrementCount();
+        }
+        cardService.handleAnswer(deckId, card, answer, effectiveSettings);
         statisticsService.updateStatisticsForAnswer(deckId, answer);
-        return null; // TODO
+        deckRepository.save(deck);
+        return getScheduledCards(deck);
     }
 
     public ScheduledCardReviews getScheduledCards(String deckId, UserInfo user)
     {
         Deck deck = getDeck(deckId, user);
+        return getScheduledCards(deck);
+    }
+
+    private ScheduledCardReviews getScheduledCards(Deck deck)
+    {
         CardCounter cardCounter = deck.getNewCardsSeen();
         LocalDateTime currentDateTimeDays = dateTimeProvider.now().truncatedTo(ChronoUnit.DAYS);
-
-        LocalDateTime lastNewCardsSeenDate = dateTimeProvider.convert(cardCounter.getDate()).truncatedTo(ChronoUnit.DAYS);
-        if (!currentDateTimeDays.isEqual(lastNewCardsSeenDate))
-        {
-            cardCounter.setDate(Instant.now());
-            cardCounter.setCount(0);
-        }
-
+        restartNewCardsSeenCounterIfNecessary(deck);
         int newCards = deck.getEffectiveSettings().getNewCardsPerDay() - cardCounter.getCount();
         ScheduledCardReviews cardReviews = cardService.getCardToReview(ScheduledCardQuery.builder()
-                .deckId(deckId)
+                .deckId(deck.getId())
                 .date(currentDateTimeDays)
                 .newCards(newCards)
                 .build());
         Card cardToReview = cardMapper.mapForReview(cardReviews.getCardToReview());
         if (cardToReview != null)
         {
-            cardService.predictNextReview(cardToReview, CardReviewAnswer.EASY, deck.getEffectiveSettings()); // TODO
+            LocalDateTime nextReviewWrong = cardService.predictNextReview(cardToReview, CardReviewAnswer.WRONG, deck.getEffectiveSettings());
+            LocalDateTime nextReviewHard = cardService.predictNextReview(cardToReview, CardReviewAnswer.HARD, deck.getEffectiveSettings());
+            LocalDateTime nextReviewGood = cardService.predictNextReview(cardToReview, CardReviewAnswer.GOOD, deck.getEffectiveSettings());
+            LocalDateTime nextReviewEasy = cardService.predictNextReview(cardToReview, CardReviewAnswer.EASY, deck.getEffectiveSettings());
+            LocalDateTime now = dateTimeProvider.now();
+            cardReviews.setWrongAnswerIntervalPrediction(getAnswerIntervalPrediction(nextReviewWrong, now));
+            cardReviews.setHardAnswerIntervalPrediction(getAnswerIntervalPrediction(nextReviewHard, now));
+            cardReviews.setGoodAnswerIntervalPrediction(getAnswerIntervalPrediction(nextReviewGood, now));
+            cardReviews.setEasyAnswerIntervalPrediction(getAnswerIntervalPrediction(nextReviewEasy, now));
         }
-        return null;
+        return cardReviews;
+    }
+
+    private AnswerIntervalPrediction getAnswerIntervalPrediction(LocalDateTime nextReview, LocalDateTime now)
+    {
+        Duration duration = Duration.between(now, nextReview);
+        long diffInDays = duration.toDays();
+        if (diffInDays > 0)
+        {
+            return new AnswerIntervalPrediction()
+                    .unit(AnswerIntervalPredictionUnit.DAYS)
+                    .value((int) diffInDays);
+        }
+        long diffInHours = duration.toHours();
+        if (diffInHours > 0)
+        {
+            return new AnswerIntervalPrediction()
+                    .unit(AnswerIntervalPredictionUnit.HOURS)
+                    .value((int) diffInHours);
+        }
+        long diffInMinutes = duration.toMinutes();
+        if (diffInMinutes > 0)
+        {
+            return new AnswerIntervalPrediction()
+                    .unit(AnswerIntervalPredictionUnit.MINUTES)
+                    .value((int) diffInMinutes);
+        }
+        throw new InternalException("Difference between dates smaller than 1 minute!");
+    }
+
+    private void restartNewCardsSeenCounterIfNecessary(Deck deck)
+    {
+        CardCounter cardCounter = deck.getNewCardsSeen();
+        LocalDateTime currentDateTimeDays = dateTimeProvider.now().truncatedTo(ChronoUnit.DAYS);
+        LocalDateTime lastNewCardsSeenDate = dateTimeProvider.convert(cardCounter.getDate()).truncatedTo(ChronoUnit.DAYS);
+        if (!currentDateTimeDays.isEqual(lastNewCardsSeenDate))
+        {
+            cardCounter.setDate(Instant.now());
+            cardCounter.setCount(0);
+        }
     }
 
     public Deck updateDeck(String deckId, DeckUpdateRequest updateRequest, UserInfo user)

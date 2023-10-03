@@ -41,7 +41,7 @@ public class SettingsService
                         .setEasyRate(3.f)
                         .setHardRate(0.7f)
                         .setMaxInterval(365)
-                        .setMinInterval(1)
+                        .setMinIntervalIncrease(2)
                         .setGlobalEaseModifier(1.f)
                         .setIntervalRateAfterFail(0.1f)
                         .setLeechThreshold(12)

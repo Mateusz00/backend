@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -23,6 +22,10 @@ import lombok.NonNull;
         name = "card_deckId_status",
         def = "{'deckId': 1, 'status': 1}"
 )
+@CompoundIndex(
+        name = "card_deckId_nextReview",
+        def = "{'deckId': 1, 'nextReview': 1}"
+)
 public class Card
 {
     @Id
@@ -33,7 +36,6 @@ public class Card
     private List<CardContent> back;
     @NonNull
     private CardStatus status = CardStatus.NEW;
-    @Indexed
     private Instant nextReview;
     private float easeRate = 1.f;
     private int interval = 0;

@@ -15,4 +15,9 @@ public class CardCounter
 {
     private int count = 0;
     private Instant date = Instant.now();
+
+    public void incrementCount()
+    {
+        count += 1;
+    }
 }

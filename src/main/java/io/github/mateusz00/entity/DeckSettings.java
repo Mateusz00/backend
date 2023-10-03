@@ -15,7 +15,7 @@ public class DeckSettings
     private float easyRate;
     private float hardRate;
     private int maxInterval;
-    private int minInterval;
+    private int minIntervalIncrease;
     private float globalEaseModifier;
     private float intervalRateAfterFail;
     private int leechThreshold;

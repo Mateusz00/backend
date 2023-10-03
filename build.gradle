@@ -5,8 +5,12 @@ plugins {
 	id "org.openapi.generator" version "7.0.0"
 }
 
-group = 'com.example'
-version = '0.0.1-SNAPSHOT'
+group = 'io.github.mateusz00'
+version = '1.0'
+
+bootJar {
+	archiveFileName = "${archiveBaseName.get()}.${archiveExtension.get()}"
+}
 
 java {
 	sourceCompatibility = '17'

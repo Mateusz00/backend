@@ -15,7 +15,7 @@ public class CustomDeckSettings
     private Float easyRate;
     private Float hardRate;
     private Integer maxInterval;
-    private Integer minInterval;
+    private Integer minIntervalIncrease;
     private Float globalEaseModifier;
     private Float intervalRateAfterFail;
     private Integer leechThreshold;

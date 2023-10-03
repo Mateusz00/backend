@@ -19,5 +19,5 @@ public interface CardRepository extends MongoRepository<Card, String>, CustomCar
 
     long countByDeckIdAndNextReviewLessThanEqual(String deckId, Instant nextReview);
 
-    Optional<Card> findByDeckIdAndNextReviewLessThanEqual(String deckId, Instant nextReview);
+    Optional<Card> findByDeckIdAndNextReviewLessThanEqualOrderByNextReviewAsc(String deckId, Instant nextReview);
 }
