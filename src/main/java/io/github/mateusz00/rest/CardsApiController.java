@@ -69,8 +69,7 @@ public class CardsApiController implements CardsApi
     @Override
     public ResponseEntity<ScheduledCardReviews> submitAnswerForCard(String deckId, String cardId, SubmittedCardReviewAnswer submittedCardReviewAnswer)
     {
-        deckService.submitAnswerForCard(deckId, cardId, submittedCardReviewAnswer, userProvider.getUser());
-        return null; // TODO
+        return ResponseEntity.ok(deckService.submitAnswerForCard(deckId, cardId, submittedCardReviewAnswer, userProvider.getUser()));
     }
 
     @Override

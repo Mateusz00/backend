@@ -17,5 +17,5 @@ public class SecurityConstants {
     @Value("${jwt.prefix}")
     private String tokenPrefix;
     @Value("${jwt.expiration}")
-    private Integer expirationTime;
+    private Long expirationTime;
 }

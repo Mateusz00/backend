@@ -9,6 +9,7 @@ import io.github.mateusz00.api.model.DeckCreateRequest;
 import io.github.mateusz00.api.model.DeckStatistics;
 import io.github.mateusz00.api.model.DeckUpdateRequest;
 import io.github.mateusz00.api.model.DecksPage;
+import io.github.mateusz00.api.model.StatisticsInterval;
 import io.github.mateusz00.mapper.DeckMapper;
 import io.github.mateusz00.service.UserProvider;
 import io.github.mateusz00.service.deck.DeckPageQuery;
@@ -45,7 +46,7 @@ public class DecksApiController implements DecksApi
     }
 
     @Override
-    public ResponseEntity<DeckStatistics> getDeckStatistics(String deckId, String interval, String dateRangeStart, String dateRangeEnd)
+    public ResponseEntity<DeckStatistics> getDeckStatistics(String deckId, StatisticsInterval interval, String dateRangeStart, String dateRangeEnd)
     {
         return null; // TODO
     }

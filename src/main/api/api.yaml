@@ -732,7 +732,11 @@ paths:
         - Resources
       summary: Upload Resource
       operationId: uploadResource
-      description: "Upload media like audio and images"
+      description: |
+        Upload media like audio and images. Allowed file types: mpeg, ogg, png, jpg, webp.
+        File size limit is:
+        * Users = 1MB
+        * Admin = 10MB
       requestBody:
         content:
           multipart/form-data:
@@ -923,15 +927,9 @@ components:
     ResourceUploadRequest:
       type: object
       properties:
-        type:
-          $ref: '#/components/schemas/ResourceType'
         file:
           type: string
           format: binary
-          description: "Max file size is 1MB"
-    ResourceType:
-      type: string
-      description: "Allowed file types: mp3, aac, opus, png, jpg, webp"
     FileDownloadResult:
       type: object
       properties:
@@ -1663,6 +1661,11 @@ components:
         - MINUTES
         - HOURS
         - DAYS
+    StatisticsInterval:
+      type: string
+      enum:
+        - MONTHLY
+        - DAILY
 
   parameters:
     exerciseIdPathParam:
@@ -1788,10 +1791,7 @@ components:
         * MONTHLY = last 12 months 
         * DAILY = all days of the current month
       schema:
-        type: string
-        enum:
-          - MONTHLY
-          - DAILY
+        $ref: '#/components/schemas/StatisticsInterval'
     statisticsDateRangeStartQueryParam:
       name: dateRangeStart
       in: query

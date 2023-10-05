@@ -9,13 +9,14 @@ services:
     ports:
       - "8081:80"
 
-  app:
-    environment:
-      - SPRING_DATA_MONGODB_HOST=mongodb
-      - LOCAL_S3=localS3
-    image: mateuszsek/backend:latest
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mongodb
-      - localS3
+#  app:
+#    environment:
+#      - SPRING_DATA_MONGODB_HOST=mongodb
+#      - LOCAL_S3=localS3
+#      - SPRING_PROFILES_ACTIVE=local
+#    image: mateuszsek/backend:latest
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - mongodb
+#      - localS3
