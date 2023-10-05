@@ -68,9 +68,9 @@ dependencies {
 	implementation 'com.google.guava:guava:32.1.2-jre'
 	implementation 'io.swagger.core.v3:swagger-annotations:2.2.15'
 	implementation 'org.apache.commons:commons-collections4:4.4'
+	implementation 'org.apache.tika:tika-core:2.9.0'
 	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
 	implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
-	implementation 'org.apache.tika:tika-core:2.9.0'
 
 	compileOnly 'org.projectlombok:lombok'
 

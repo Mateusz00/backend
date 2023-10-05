@@ -20,6 +20,7 @@ import static io.github.mateusz00.configuration.AwsS3Configuration.S3_BUCKET;
 public class S3Service
 {
     private final S3Client client;
+    private final S3UrlProvider s3UrlProvider;
 
     public String uploadMediaResource(String key, byte[] content)
     {
@@ -30,13 +31,11 @@ public class S3Service
         try
         {
             client.putObject(request, RequestBody.fromByteBuffer(ByteBuffer.wrap(content)));
-            return client.utilities()
-                    .getUrl(builder -> builder.bucket(S3_BUCKET).key(key))
-                    .toString();
+            return s3UrlProvider.getUrl(S3_BUCKET, key);
         }
         catch (SdkException e)
         {
-            throw new InternalException("Failed upload to S3");
+            throw new InternalException("Failed upload to S3", e);
         }
     }
 }
