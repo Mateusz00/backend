@@ -17,6 +17,10 @@ services:
       - AWS_SECRET_ACCESS_KEY=LOCAL
       - LOCAL_S3_HOST=localS3
       - LOCAL_S3_PORT=80
+      - SPRING_MAIL_USERNAME=vida.schaefer@ethereal.email
+      - SPRING_MAIL_PASSWORD=KkFwCFJWhUTkmXFyZM
+      - SPRING_MAIL_HOST=smtp.ethereal.email
+      - SPRING_MAIL_PORT=587
     image: mateuszsek/backend:latest
     ports:
       - "8080:8080"

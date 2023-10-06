@@ -1569,9 +1569,12 @@ components:
     PasswordResetRequest:
       type: object
       required:
+        - email
         - token
         - newPassword
       properties:
+        email:
+          $ref: '#/components/schemas/AccountEmail'
         token:
           $ref: '#/components/schemas/PasswordResetToken'
         newPassword:

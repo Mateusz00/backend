@@ -11,6 +11,7 @@ import io.github.mateusz00.api.model.AccountsPage;
 import io.github.mateusz00.api.model.PasswordResetRequest;
 import io.github.mateusz00.api.model.PasswordResetTokenRequest;
 import io.github.mateusz00.entity.User;
+import io.github.mateusz00.service.PasswordResetTokenService;
 import io.github.mateusz00.service.TokenService;
 import io.github.mateusz00.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,11 +24,13 @@ public class AccountsApiController implements AccountsApi
     private final UserService userService;
     private final HttpServletResponse response;
     private final TokenService tokenService;
+    private final PasswordResetTokenService passwordResetTokenService;
 
     @Override
     public ResponseEntity<Void> createPasswordResetToken(PasswordResetTokenRequest passwordResetTokenRequest)
     {
-        return null; // TODO
+        passwordResetTokenService.sendResetToken(passwordResetTokenRequest);
+        return ResponseEntity.noContent().build();
     }
 
     @Override

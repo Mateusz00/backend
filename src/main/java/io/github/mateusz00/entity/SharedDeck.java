@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -42,7 +43,7 @@ public class SharedDeck
     private String ownerUsername;
     @CreatedDate
     private Instant sharedAt;
-    @Indexed
+    @TextIndexed
     private String name;
     private String language;
     private List<String> tags;

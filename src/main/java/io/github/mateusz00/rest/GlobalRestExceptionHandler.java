@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -61,7 +62,7 @@ public class GlobalRestExceptionHandler
         return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ InternalException.class, IOException.class })
+    @ExceptionHandler({ InternalException.class, IOException.class, MailException.class })
     public ResponseEntity<ApiErrorResponse> exceptionHandlerInternal(Exception e)
     {
         log.error("Internal exception occurred: {}", e.getMessage(), e);

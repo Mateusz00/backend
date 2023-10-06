@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.TextCriteria;
 
 import io.github.mateusz00.entity.SharedDeck;
 import io.github.mateusz00.service.deck.shared.SharedDeckPageQuery;
@@ -16,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CustomSharedDeckRepositoryImpl implements CustomSharedDeckRepository
 {
-    public static final String NAME = "name";
     public static final String LANGUAGE = "language";
     public static final String TAGS = "tags";
     private final MongoTemplate mongoTemplate;
@@ -26,7 +26,8 @@ public class CustomSharedDeckRepositoryImpl implements CustomSharedDeckRepositor
     {
         PageRequest pageRequest = pageQuery.getPageRequest();
         var query = new Query();
-        query.addCriteria(new Criteria(NAME).is(pageQuery.getName()));
+        query.allowDiskUse(true);
+        query.addCriteria(new TextCriteria().matching(pageQuery.getName()));
         query.addCriteria(new Criteria(LANGUAGE).is(pageQuery.getLanguage()));
         query.addCriteria(new Criteria(TAGS).is(pageQuery.getTag()));
 

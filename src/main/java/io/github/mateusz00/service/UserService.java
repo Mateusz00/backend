@@ -1,5 +1,6 @@
 package io.github.mateusz00.service;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -84,5 +85,10 @@ public class UserService
     public void ensureUserExists(String userId)
     {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User", userId)); // NOSONAR
+    }
+
+    public Optional<User> findUser(String email)
+    {
+        return userRepository.findByEmail(email);
     }
 }
