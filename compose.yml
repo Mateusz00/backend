@@ -12,7 +12,7 @@ services:
   app:
     environment:
       - SPRING_DATA_MONGODB_HOST=mongodb
-      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_PROFILES_ACTIVE=local,docker
       - AWS_ACCESS_KEY_ID=LOCAL
       - AWS_SECRET_ACCESS_KEY=LOCAL
       - LOCAL_S3_HOST=localS3

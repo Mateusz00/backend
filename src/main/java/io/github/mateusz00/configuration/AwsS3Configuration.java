@@ -29,7 +29,6 @@ public class AwsS3Configuration
 
     @Bean
     @Profile("local")
-    @SneakyThrows
     S3Client s3ClientLocal() throws URISyntaxException
     {
         var s3 = S3Client.builder() // NOSONAR
@@ -52,7 +51,7 @@ public class AwsS3Configuration
     }
 
     @Bean
-    @Profile("local")
+    @Profile({"local & docker"})
     @Primary
     S3UrlProvider s3LocalUrlProvider(S3Client s3Client)
     {
