@@ -198,26 +198,18 @@ public class DeckService
         cardService.handleAnswer(deckId, card, answer, effectiveSettings);
         statisticsService.updateStatisticsForAnswer(deckId, answer);
         deckRepository.save(deck);
-        return getScheduledCards(deck);
+        return getScheduledCardsWithPredictions(deck);
     }
 
-    public ScheduledCardReviews getScheduledCards(String deckId, UserInfo user)
+    public ScheduledCardReviews getScheduledCardsWithPredictions(String deckId, UserInfo user)
     {
         Deck deck = getDeck(deckId, user);
-        return getScheduledCards(deck);
+        return getScheduledCardsWithPredictions(deck);
     }
 
-    private ScheduledCardReviews getScheduledCards(Deck deck)
+    private ScheduledCardReviews getScheduledCardsWithPredictions(Deck deck)
     {
-        CardCounter cardCounter = deck.getNewCardsSeen();
-        LocalDateTime currentDateTimeDays = dateTimeProvider.now().truncatedTo(ChronoUnit.DAYS);
-        restartNewCardsSeenCounterIfNecessary(deck);
-        int newCards = deck.getEffectiveSettings().getNewCardsPerDay() - cardCounter.getCount();
-        ScheduledCardReviews cardReviews = cardService.getCardToReview(ScheduledCardQuery.builder()
-                .deckId(deck.getId())
-                .date(currentDateTimeDays)
-                .newCards(newCards)
-                .build());
+        ScheduledCardReviews cardReviews = getScheduledCards(deck);
         Card cardToReview = cardMapper.mapForReview(cardReviews.getCardToReview());
         if (cardToReview != null)
         {
@@ -232,6 +224,19 @@ public class DeckService
             cardReviews.setEasyAnswerIntervalPrediction(getAnswerIntervalPrediction(nextReviewEasy, now));
         }
         return cardReviews;
+    }
+
+    private ScheduledCardReviews getScheduledCards(Deck deck)
+    {
+        CardCounter cardCounter = deck.getNewCardsSeen();
+        LocalDateTime currentDateTimeDays = dateTimeProvider.now().truncatedTo(ChronoUnit.DAYS);
+        restartNewCardsSeenCounterIfNecessary(deck);
+        int newCards = deck.getEffectiveSettings().getNewCardsPerDay() - cardCounter.getCount();
+        return cardService.getCardToReview(ScheduledCardQuery.builder()
+                .deckId(deck.getId())
+                .date(currentDateTimeDays)
+                .newCards(newCards)
+                .build());
     }
 
     private AnswerIntervalPrediction getAnswerIntervalPrediction(LocalDateTime nextReview, LocalDateTime now)
@@ -325,8 +330,9 @@ public class DeckService
 
     private DeckSearchResult createDeckSearchResult(Deck deck)
     {
+        ScheduledCardReviews cardReviews = getScheduledCards(deck);
         return deckMapper.mapToSearchResult(deck)
-                .waitingReviews(2); // TODO query cards
+                .waitingReviews(cardReviews.getTotal());
     }
 
     private void ensureHasAccess(UserInfo user, Deck deck)

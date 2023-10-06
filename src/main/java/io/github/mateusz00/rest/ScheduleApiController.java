@@ -21,7 +21,7 @@ public class ScheduleApiController implements ScheduleApi
     @Override
     public ResponseEntity<ScheduledCardReviews> getScheduledCards(String deckId)
     {
-        return ResponseEntity.ok(deckService.getScheduledCards(deckId, userProvider.getUser()));
+        return ResponseEntity.ok(deckService.getScheduledCardsWithPredictions(deckId, userProvider.getUser()));
     }
 
     @Override
