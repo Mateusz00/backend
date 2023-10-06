@@ -16,6 +16,7 @@ import io.github.mateusz00.mapper.SharedDeckMapper;
 import io.github.mateusz00.service.UserProvider;
 import io.github.mateusz00.service.deck.DeckService;
 import io.github.mateusz00.service.deck.shared.SharedCardPageQuery;
+import io.github.mateusz00.service.deck.shared.SharedDeckPageQuery;
 import io.github.mateusz00.service.deck.shared.SharedDeckService;
 import lombok.RequiredArgsConstructor;
 
@@ -71,7 +72,21 @@ public class SharedDecksApiController implements SharedDecksApi
     @Override
     public ResponseEntity<SharedDecksPage> listSharedDecks(Integer limit, Integer offset, String language, String sortBy, String tag, String name)
     {
-        return null; // TODO
+        var query = SharedDeckPageQuery.builder()
+                .sort(sharedDeckMapper.mapSort(sortBy))
+                .pageNumber(offset)
+                .pageSize(limit)
+                .language(language)
+                .tag(tag)
+                .name(name)
+                .build();
+        Page<io.github.mateusz00.entity.SharedDeck> decksPage = sharedDeckService.getPage(query);
+        return ResponseEntity.ok(new SharedDecksPage()
+                .currentPage(query.getPageNumber())
+                .limit(query.getPageSize())
+                .pageTotal(decksPage.getTotalPages())
+                .total((int) decksPage.getTotalElements())
+                .decks(sharedDeckMapper.map(decksPage.getContent())));
     }
 
     @Override

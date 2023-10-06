@@ -148,7 +148,7 @@ paths:
       summary: "List decks"
       operationId: listDecks
       parameters:
-        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/deckPageLimitQueryParam'
         - $ref: '#/components/parameters/pageOffsetQueryParam'
         - $ref: '#/components/parameters/isoLanguageCodeQueryParam'
       responses:
@@ -1721,6 +1721,17 @@ components:
         minimum: 1
         maximum: 100
         default: 100
+    deckPageLimitQueryParam:
+      name: limit
+      in: query
+      description: "The maximum number of entries to return"
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 10
+        default: 10
     cardsLimitQueryParam:
       name: limit
       in: query

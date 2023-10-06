@@ -92,4 +92,9 @@ public class SharedDeckService
         }
         return deck;
     }
+
+    public Page<SharedDeck> getPage(SharedDeckPageQuery query)
+    {
+        return sharedDeckRepository.listSharedDecks(query);
+    }
 }

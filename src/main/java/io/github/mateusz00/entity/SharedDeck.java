@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -18,6 +19,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @TypeAlias("SharedDeck")
+@CompoundIndex(
+        name = "sharedDeck_language_tags",
+        def = "{'language': 1, 'tags': 1}")
+@CompoundIndex(
+        name = "sharedDeck_language_cardCount",
+        def = "{'language': 1, 'cardCount': 1}")
+@CompoundIndex(
+        name = "sharedDeck_language_popularity",
+        def = "{'language': 1, 'popularity': 1}")
+@CompoundIndex(
+        name = "sharedDeck_tags_cardCount",
+        def = "{'tags': 1, 'cardCount': 1}")
+@CompoundIndex(
+        name = "sharedDeck_tags_popularity",
+        def = "{'tags': 1, 'popularity': 1}")
 public class SharedDeck
 {
     @Id
@@ -26,10 +42,9 @@ public class SharedDeck
     private String ownerUsername;
     @CreatedDate
     private Instant sharedAt;
+    @Indexed
     private String name;
-    @Indexed
     private String language;
-    @Indexed
     private List<String> tags;
     private String description;
     private int cardCount;
