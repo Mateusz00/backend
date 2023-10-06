@@ -15,16 +15,19 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
+public class JWTAuthorizationFilter extends BasicAuthenticationFilter
+{
     private final TokenService tokenService;
 
-    public JWTAuthorizationFilter(AuthenticationManager authenticationManager, TokenService tokenService) {
+    public JWTAuthorizationFilter(AuthenticationManager authenticationManager, TokenService tokenService)
+    {
         super(authenticationManager);
         this.tokenService = tokenService;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException
+    {
         String token = request.getHeader(HttpHeaders.AUTHORIZATION);
         tokenService.getSpringAuthenticationToken(token)
                 .ifPresent(usernamePasswordAuthenticationToken -> SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken));

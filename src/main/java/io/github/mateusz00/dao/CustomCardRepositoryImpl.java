@@ -45,7 +45,7 @@ public class CustomCardRepositoryImpl implements CustomCardRepository
         long count = -1;
         if (pageQuery.isShouldGetTotal())
         {
-             count = mongoTemplate.count(query, Card.class);
+            count = mongoTemplate.count(query, Card.class);
         }
         List<Card> cards = mongoTemplate.find(query.with(pageRequest), Card.class);
         return new PageImpl<>(cards, pageRequest, count);

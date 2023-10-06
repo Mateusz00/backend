@@ -11,7 +11,8 @@ import lombok.RequiredArgsConstructor;
 @PropertySource("classpath:jwt.properties")
 @Getter
 @RequiredArgsConstructor
-public class SecurityConstants {
+public class SecurityConstants
+{
     @Value("${jwt.secret}")
     private String secret;
     @Value("${jwt.prefix}")

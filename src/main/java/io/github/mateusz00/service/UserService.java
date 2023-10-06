@@ -35,7 +35,8 @@ public class UserService
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher eventPublisher;
 
-    public User registerUser(AccountRegistration accountRegistration) {
+    public User registerUser(AccountRegistration accountRegistration)
+    {
         if (userRepository.findByUsername(accountRegistration.getUsername()).isPresent())
             throw new BadRequestException("Username already used!");
 
@@ -53,15 +54,19 @@ public class UserService
                 .setRoles(Set.of(UserRole.ROLE_USER));
         return userRepository.save(user);
     }
-    
-    private void validate(AccountRegistration accountRegistration) {
-        if (isBlank(accountRegistration.getUsername())) {
+
+    private void validate(AccountRegistration accountRegistration)
+    {
+        if (isBlank(accountRegistration.getUsername()))
+        {
             throw new BadRequestException("Invalid username!");
         }
-        if (isBlank(accountRegistration.getEmail())) {
+        if (isBlank(accountRegistration.getEmail()))
+        {
             throw new BadRequestException("Invalid email!");
         }
-        if (!isPasswordValid(accountRegistration.getPassword())) {
+        if (!isPasswordValid(accountRegistration.getPassword()))
+        {
             throw new BadRequestException("Invalid password!");
         }
     }

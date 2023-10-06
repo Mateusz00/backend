@@ -19,7 +19,8 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @AllArgsConstructor
 @TypeAlias("User")
-public class User {
+public class User
+{
 
     @Id
     private String id;

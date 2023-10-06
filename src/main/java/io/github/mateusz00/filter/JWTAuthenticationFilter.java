@@ -18,21 +18,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 @RequiredArgsConstructor
-public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter
+{
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
 
     @Override
     @SneakyThrows
-    public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res) throws AuthenticationException {
+    public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res) throws AuthenticationException
+    {
         AccountLogin credentials = OBJECT_MAPPER.readValue(req.getInputStream(), AccountLogin.class);
         var token = UsernamePasswordAuthenticationToken.unauthenticated(StringUtils.trim(credentials.getEmail()), StringUtils.trim(credentials.getPassword()));
         return authenticationManager.authenticate(token);
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication auth) {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication auth)
+    {
         response.addHeader(HttpHeaders.AUTHORIZATION, tokenService.createToken(auth));
     }
 }

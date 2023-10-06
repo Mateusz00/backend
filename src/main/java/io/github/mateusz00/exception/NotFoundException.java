@@ -2,7 +2,8 @@ package io.github.mateusz00.exception;
 
 public class NotFoundException extends RuntimeException
 {
-    public NotFoundException() {
+    public NotFoundException()
+    {
         super();
     }
 

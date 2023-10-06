@@ -46,16 +46,18 @@ public class AwsS3Configuration
                     .build());
             log.info("Created s3 bucket: " + S3_BUCKET);
         }
-        catch (Exception e) { /* IGNORE */}
+        catch (Exception e)
+        { /* IGNORE */}
         return s3;
     }
 
     @Bean
-    @Profile({"local & docker"})
+    @Profile({ "local & docker" })
     @Primary
     S3UrlProvider s3LocalUrlProvider(S3Client s3Client)
     {
-        return new S3UrlProvider(s3Client) {
+        return new S3UrlProvider(s3Client)
+        {
             @SneakyThrows
             @Override
             public String getUrl(String s3Bucket, String key)

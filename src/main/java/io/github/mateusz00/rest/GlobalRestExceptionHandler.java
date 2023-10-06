@@ -27,7 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalRestExceptionHandler
 {
     @ExceptionHandler({ MethodArgumentNotValidException.class })
-    public ResponseEntity<ApiErrorResponse> exceptionHandler(MethodArgumentNotValidException e) {
+    public ResponseEntity<ApiErrorResponse> exceptionHandler(MethodArgumentNotValidException e)
+    {
         var msg = Optional.of(e)
                 .map(BindException::getBindingResult)
                 .map(Errors::getFieldErrors)
@@ -40,31 +41,36 @@ public class GlobalRestExceptionHandler
     }
 
     @ExceptionHandler({ AuthorizationException.class })
-    public ResponseEntity<ApiErrorResponse> genericHandler403(Exception e) {
+    public ResponseEntity<ApiErrorResponse> genericHandler403(Exception e)
+    {
         var apiErrorResponse = new ApiErrorResponse(HttpStatus.FORBIDDEN.value(), "You must be authorized");
         return new ResponseEntity<>(apiErrorResponse, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler({ NotFoundException.class })
-    public ResponseEntity<ApiErrorResponse> genericHandler404(Exception e) {
+    public ResponseEntity<ApiErrorResponse> genericHandler404(Exception e)
+    {
         var apiErrorResponse = new ApiErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
         return new ResponseEntity<>(apiErrorResponse, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler({ BadRequestException.class, UsernameNotFoundException.class, ConstraintViolationException.class })
-    public ResponseEntity<ApiErrorResponse> exceptionHandlerBadRequest(Exception e) {
+    public ResponseEntity<ApiErrorResponse> exceptionHandlerBadRequest(Exception e)
+    {
         var apiErrorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
         return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({ InternalException.class, IOException.class })
-    public ResponseEntity<ApiErrorResponse> exceptionHandlerInternal(Exception e) {
+    public ResponseEntity<ApiErrorResponse> exceptionHandlerInternal(Exception e)
+    {
         log.error("Internal exception occurred: {}", e.getMessage(), e);
         return getInternalErrorResponse();
     }
 
     @ExceptionHandler({ Exception.class })
-    public ResponseEntity<ApiErrorResponse> exceptionHandlerUncaught(Exception e) {
+    public ResponseEntity<ApiErrorResponse> exceptionHandlerUncaught(Exception e)
+    {
         log.error("Unexpected exception occurred: {}", e.getMessage(), e);
         return getInternalErrorResponse();
     }

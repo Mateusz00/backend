@@ -128,6 +128,7 @@ class CardService
         easeRate = Math.max(MIN_EASE_RATE, easeRate);
         return Math.min(MAX_EASE_RATE, easeRate);
     }
+
     // TODO unit test
     private int getNewStep(Card card, DeckSettings effectiveSettings, CardReviewAnswer answer)
     {

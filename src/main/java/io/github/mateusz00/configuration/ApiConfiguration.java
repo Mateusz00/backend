@@ -11,7 +11,8 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 public class ApiConfiguration
 {
     @Bean
-    LocaleResolver localeResolver() {
+    LocaleResolver localeResolver()
+    {
         SessionLocaleResolver slr = new SessionLocaleResolver();
         slr.setDefaultLocale(Locale.ENGLISH);
         return slr;

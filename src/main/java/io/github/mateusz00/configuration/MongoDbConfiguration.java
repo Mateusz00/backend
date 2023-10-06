@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 
 @Configuration
 @EnableMongoAuditing
-@EnableMongoRepositories(basePackages = {"io.github.mateusz00.dao"})
+@EnableMongoRepositories(basePackages = { "io.github.mateusz00.dao" })
 public class MongoDbConfiguration
 {
 }

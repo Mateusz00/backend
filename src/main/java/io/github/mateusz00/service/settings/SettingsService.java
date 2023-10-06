@@ -45,7 +45,7 @@ public class SettingsService
                         .setGlobalEaseModifier(1.f)
                         .setIntervalRateAfterFail(0.1f)
                         .setLeechThreshold(12)
-                        .setNewCardSteps(new int[]{7, 30}))
+                        .setNewCardSteps(new int[] { 7, 30 }))
                 .setDefaultGrammarSettings(new GrammarSettingsDetails()
                         .setMaxInterval(365)
                         .setIntervalRateAfterFail(0.1f)

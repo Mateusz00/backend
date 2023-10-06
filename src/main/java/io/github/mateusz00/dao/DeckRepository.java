@@ -11,5 +11,6 @@ import io.github.mateusz00.entity.Deck;
 public interface DeckRepository extends MongoRepository<Deck, String>
 {
     Page<Deck> findAllByUserIdAndLanguage(String userId, String language, Pageable pageable);
+
     List<Deck> findAllByUserId(String userId);
 }

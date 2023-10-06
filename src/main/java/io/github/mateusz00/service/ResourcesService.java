@@ -20,10 +20,10 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class ResourcesService
 {
-    private final S3Service s3Service;
     private static final Tika TIKA = new Tika();
     private static final Set<String> ALLOWED_TYPES = Set.of("application/ogg", "image/webp", "image/jpeg", "audio/mpeg", "image/png");
     private static final long USER_MAX_FILE_SIZE = 1024L * 1024L;
+    private final S3Service s3Service;
 
     public String uploadResource(MultipartFile file, UserInfo user)
     {

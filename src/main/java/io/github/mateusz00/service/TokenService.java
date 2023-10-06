@@ -33,12 +33,14 @@ public class TokenService
     static final String EMAIL_CLAIM = "email";
     private final SecurityConstants securityConstants;
 
-    public String createToken(Authentication auth) {
+    public String createToken(Authentication auth)
+    {
         CustomUser user = (CustomUser) auth.getPrincipal();
         return createToken(user.getUsername(), user.getUserId(), user.getEmail(), user.getRoles());
     }
 
-    public String createToken(String username, String userId, String email, Set<UserRole> roles) {
+    public String createToken(String username, String userId, String email, Set<UserRole> roles)
+    {
         String jwt = JWT.create()
                 .withClaim(ROLES_CLAIM, roles.stream().map(Enum::toString).toList())
                 .withClaim(USER_ID_CLAIM, userId)
@@ -49,8 +51,10 @@ public class TokenService
         return getTokenPrefix() + jwt;
     }
 
-    public Optional<UsernamePasswordAuthenticationToken> getSpringAuthenticationToken(@Nullable String token) {
-        if (StringUtils.isBlank(token) || !token.startsWith(securityConstants.getTokenPrefix())) {
+    public Optional<UsernamePasswordAuthenticationToken> getSpringAuthenticationToken(@Nullable String token)
+    {
+        if (StringUtils.isBlank(token) || !token.startsWith(securityConstants.getTokenPrefix()))
+        {
             return Optional.empty();
         }
 
@@ -71,21 +75,26 @@ public class TokenService
 
     private void ensureJwtIsValid(String username, List<UserRole> roles, String email, String userId)
     {
-        if (StringUtils.isBlank(username)) {
+        if (StringUtils.isBlank(username))
+        {
             throw new InternalException("Invalid JWT with empty username " + username);
         }
-        if (StringUtils.isBlank(email)) {
+        if (StringUtils.isBlank(email))
+        {
             throw new InternalException("Invalid JWT with empty email " + email);
         }
-        if (StringUtils.isBlank(userId)) {
+        if (StringUtils.isBlank(userId))
+        {
             throw new InternalException("Invalid JWT with empty userId " + userId);
         }
-        if (CollectionUtils.isEmpty(roles)) {
+        if (CollectionUtils.isEmpty(roles))
+        {
             throw new InternalException("Invalid JWT with empty roles " + roles);
         }
     }
 
-    private String getTokenPrefix() {
+    private String getTokenPrefix()
+    {
         return securityConstants.getTokenPrefix() + " ";
     }
 }

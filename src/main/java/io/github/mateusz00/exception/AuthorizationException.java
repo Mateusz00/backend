@@ -2,7 +2,8 @@ package io.github.mateusz00.exception;
 
 public class AuthorizationException extends RuntimeException
 {
-    public AuthorizationException() {
+    public AuthorizationException()
+    {
         super();
     }
 

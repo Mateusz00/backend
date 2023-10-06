@@ -1669,12 +1669,12 @@ components:
 
   parameters:
     exerciseIdPathParam:
-        name: exerciseId
-        in: path
-        description: 'Unique ID of the exercise'
-        required: true
-        schema:
-          $ref: '#/components/schemas/GrammarExerciseId'
+      name: exerciseId
+      in: path
+      description: 'Unique ID of the exercise'
+      required: true
+      schema:
+        $ref: '#/components/schemas/GrammarExerciseId'
     useCaseQueryParam:
       name: useCase
       in: query

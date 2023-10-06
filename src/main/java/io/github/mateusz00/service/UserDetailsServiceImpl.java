@@ -20,15 +20,16 @@ public class UserDetailsServiceImpl implements UserDetailsService
 {
     private final UserRepository userRepository;
 
+    public static Collection<SimpleGrantedAuthority> getGrantedAuthorities(Collection<UserRole> roles)
+    {
+        return roles.stream().map(role -> new SimpleGrantedAuthority(role.name())).toList();
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
     {
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException(""));
         return new CustomUser(user.getUsername(), user.getPassword(), getGrantedAuthorities(user.getRoles()), user.getId(), user.getEmail(), user.getRoles());
-    }
-
-    public static Collection<SimpleGrantedAuthority> getGrantedAuthorities(Collection<UserRole> roles) {
-        return roles.stream().map(role -> new SimpleGrantedAuthority(role.name())).toList();
     }
 }
